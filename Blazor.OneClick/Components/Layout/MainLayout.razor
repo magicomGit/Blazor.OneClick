@@ -1,0 +1,96 @@
+﻿@using Blazor.OneClick.Static
+@using MudBlazor
+@inherits LayoutComponentBase
+
+
+<MudThemeProvider Theme="@CustomTheme.MyTheme" IsDarkMode="_dark" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Tertiary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
+
+        
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-lg-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
+    </MudDrawer>
+    
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
+        <NavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    bool _drawerOpen = true;
+
+    private bool _open = false;
+    private bool _dark = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContext == null)
+        {
+            return;
+        }
+    }
+
+    void DrawerToggle()
+    {
+        //_drawerOpen = !_drawerOpen;
+        _open = !_open;
+    }
+
+
+    void ThemeToggle()
+    {
+        //_drawerOpen = !_drawerOpen;
+        _dark = !_dark;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+@* 
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+ *@

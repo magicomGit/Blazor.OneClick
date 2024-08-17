@@ -1,0 +1,15 @@
+﻿@page "/referals"
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@inject IStringLocalizer<Referals> localize
+
+<PageTitle>Реферальная ссылка | CopyTrader</PageTitle>
+
+
+    <MudPaper  Height="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4"></MudPaper>
+
+
+@code {
+    private string Icon = Icons.Material.Filled.ContentCopy;
+    private string? referralLink { get; set; } = "";
+}
