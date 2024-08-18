@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -19,7 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <ProjectReference Include="..\OneClick.Data\OneClick.Data.csproj" />
+    <ProjectReference Include="..\OneClick.Domain\OneClick.Domain.csproj" />
+    <ProjectReference Include="..\OneClick.Services\OneClick.Services.csproj" />
+    <ProjectReference Include="..\OneClick.UseCases\OneClick.UseCases.csproj" />
   </ItemGroup>
 
 </Project>

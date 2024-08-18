@@ -1,68 +1,77 @@
 ﻿@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
+@using Blazor.OneClick.Constants
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
-@using Blazor.OneClick.Data
+
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using System.Text.RegularExpressions
+@using global::OneClick.Data.Data
+
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IStringLocalizer<Login> localize;
+@inject ApplicationDbContext _context
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
-</div>
+
+
+<MudPaper Height="100vh" Class="d-flex flex-wrap justify-center align-content-center pa-4">
+    <MudPaper Outlined Class="pa-4" Width="100%" MaxWidth="500px">
+
+
+
+        <StatusMessage  Message="@errorMessage" />
+        <div class="d-flex flex-wrap justify-content-center my-4">
+        <MudImage Style="margin-left:auto; margin-right:auto" Width="90" Src="@SystemLogo.Content" />
+
+        </div>
+
+        <MudText Align="Align.Center" Typo="Typo.h3">@localize["Login"]</MudText>
+        <MudText Align="Align.Center" Typo="Typo.body1" Class="mb-8">@localize["NeedAuth"]</MudText>
+
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
+            
+
+
+
+            <MudTextField Label="Email" HelperText="Max. 8 characters" name="Input.Email"
+                          Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AccountCircle" @bind-Value="Input.Email" For="@(() => Input.Email)" />
+            <MudTextField Label="Password" HelperText="Max. 8 characters" name="Input.Password" InputType="InputType.Password"
+                          Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" @bind-Value="Input.Password" For="@(() => Input.Password)" />
+
+
+           
+            
+                <MudButton FullWidth Class="btn-cust w-100" Size="Size.Large" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">@localize["LoginButton"]</MudButton>
+
+            
+            <div style="text-align:center" class=" my-3">
+                <p>
+                    <div>
+                        @localize["RegisterLable"]
+                        <MudLink Color="Color.Info" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">@localize["RegisterLink"]</MudLink>
+                    </div>
+                    <div>
+                        @localize["ForgotLable"]
+                        <MudLink Color="Color.Info" Href="Account/ForgotPasswordTelegram">@localize["ForgotLink"]</MudLink>
+                    </div>
+                </p>
+
+            </div>
+        </EditForm> 
+    </MudPaper>
+    
+        </MudPaper>
+
+
 
 @code {
     private string? errorMessage;
@@ -76,6 +85,13 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+
     protected override async Task OnInitializedAsync()
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method))
@@ -87,11 +103,26 @@
 
     public async Task LoginUser()
     {
-        // This doesn't count login failures towards account lockout
-        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        var user = _context.Users.Where(x => x.UserName == Input.Email).FirstOrDefault();
+        if (user != null)
+        {
+            if (user.Status == UserStatus.Frozen)
+            {
+                errorMessage = "Error: Аккаунт заморожен. Обратитесь к администрации сайта";
+                return;
+            }
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+            return;
+        }
+
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
+            user.LastActivity = DateTime.UtcNow;
+            _context.SaveChanges();
             Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo(ReturnUrl);
         }
@@ -112,10 +143,13 @@
         }
     }
 
+
+
     private sealed class InputModel
     {
         [Required]
-        [EmailAddress]
+        [RegularExpression(@"^[a-zA-Z]{1}[a-zA-Z0-9]{4,50}$",
+         ErrorMessage = "Логин должен содержать не менее 5 символов, только латиницу и цифры")]
         public string Email { get; set; } = "";
 
         [Required]
@@ -123,6 +157,6 @@
         public string Password { get; set; } = "";
 
         [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
+        public bool RememberMe { get; set; } = true;
     }
 }

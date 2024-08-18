@@ -1,0 +1,31 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using MudBlazor
+@using global::OneClick.Data.Data
+
+@attribute [Authorize]
+
+@inject IStringLocalizer<Projects> localize
+
+<PageTitle>@localize["Projects"] | CopyTrader</PageTitle>
+
+<MudPaper  MinHeight ="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Class="p-2 p-md-0">
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">@localize["Projects"]</MudText>
+            <MudText Typo="Typo.h5">(@projects?.Count)</MudText>
+            
+        </MudStack>
+
+
+
+        <MudButton Href="CreateProject" Class="btn-cust mb-2" Color="Color.Info" Variant="Variant.Filled">@localize["CreateProject"]</MudButton>
+    </MudStack>
+</MudPaper>
+
+@code{
+    private List<Project>? projects;
+}
+
+

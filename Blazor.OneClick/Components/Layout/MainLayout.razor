@@ -8,28 +8,41 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="1" Color="Color.Tertiary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
+<AuthorizeView>
+    <Authorized>
 
-        
-    </MudAppBar>
-    <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-lg-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
-        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
-    </MudDrawer>
-    
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
-        <NavMenu/>
-    </MudDrawer>
-    <MudMainContent>
-        @Body
-    </MudMainContent>
-</MudLayout>
+        <MudLayout>
+            <MudAppBar Elevation="1" Color="Color.Tertiary">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
+
+
+            </MudAppBar>
+            <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-lg-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
+            </MudDrawer>
+
+            <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                @Body
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        <MudLayout>
+           
+            
+                @Body
+           
+        </MudLayout>
+    </NotAuthorized>
+</AuthorizeView>
 @code {
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -71,7 +84,7 @@
 
 
 
-@* 
+@*
 <div class="page">
     <div class="sidebar">
         <NavMenu />

@@ -1,6 +1,6 @@
-using Blazor.OneClick.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using OneClick.Data.Data;
 
 namespace Blazor.OneClick.Components.Account
 {
