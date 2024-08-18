@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using OneClick.Services.OneClickProjects;
 using OneClick.UseCases.Intefaces.OneClickProjects;
 using OneClick.Data;
 using OneClick.Data.Data;
+using OneClick.Data.Repositoties;
 
 
 var builder = WebApplication.CreateBuilder(args);

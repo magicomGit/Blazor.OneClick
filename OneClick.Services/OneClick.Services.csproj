@@ -10,4 +10,8 @@
     <ProjectReference Include="..\OneClick.UseCases\OneClick.UseCases.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="OneClickProjects\" />
+  </ItemGroup>
+
 </Project>

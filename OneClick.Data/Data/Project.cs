@@ -1,9 +1,7 @@
-﻿using OneClick.Domain.Domain.OneClickProjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using OneClick.Data.Enums;
+using OneClick.Domain.Domain.OneClickProjects;
+
 
 namespace OneClick.Data.Data
 {
@@ -39,22 +37,54 @@ namespace OneClick.Data.Data
         public virtual Payment? Payment { get; set; }
         public string? TelegramBot { get; set; }
         public string? TelegramKey { get; set; }
+
+
+        public void SetProjectConfig(ProjectConfig config)
+        {
+            try
+            {
+                ProjectConfig = JsonConvert.SerializeObject(config, Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        public ProjectConfig GetProjectConfig()
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<ProjectConfig>(ProjectConfig);
+            }
+            catch (Exception ex)
+            {
+                return new ProjectConfig();
+            }
+        }
     }
 
-    public enum ProjectTaskState
+
+    public class ProjectConfig
     {
-        New,
-        SourceRequestRelocation,
-        SourceProjectFrozen,
-        SourceDataBaseRequest,
-        SourceDataBaseReady,
-        DestinationProjectDownloaded,
-        DestinationDataBaseDownloaded,
-        DestinationDataBaseRestored,
-        DestinationProjectReady,
-        DnsRecordChanged,
-        SourceProjectDeleteRequest,
-        SourceProjectDeleted,
-        RelocateFailure
+        public string? SystemName { get; set; }
+        public string? TelegramName { get; set; }
+        public string? TelegramKey { get; set; }
+        public List<ExchangeMarket>? Exchanges { get; set; }
+        public string? DefaultLanguage { get; set; }
+        public bool IsCrossTrading { get; set; }
+        public bool HideCopyright { get; set; }
+        public bool EnablePayment { get; set; }
+        public bool EnableBilling { get; set; }
+        public List<Language>? Languages { get; set; }
+        public List<string>? IPsWL { get; set; }
+        public bool EnableAffiliateNets { get; set; }
+        public bool IsCrossPlatformTradingAllowed { get; set; }
+        public string? UrlLogo { get; set; }
+        public ProjectTariff Tariff { get; set; } = ProjectTariff.Start;
+        public int MaxExchangeRequestInOneMinute { get; set; }
+        public int MaxExchangeRequestInFiveMinutes { get; set; }
+        public string? AdminTelegram { get; set; }
+        public long AdminTelegramId { get; set; }
     }
+
 }

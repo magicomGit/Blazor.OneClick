@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OneClick.Data.Enums;
 
 namespace OneClick.Data.Data
 {
@@ -20,17 +15,5 @@ namespace OneClick.Data.Data
         public bool ShowModal { get; set; }
     }
 
-    public enum Severity
-    {
-        [Description("normal")]
-        Normal,
-        [Description("info")]
-        Info,
-        [Description("success")]
-        Success,
-        [Description("warning")]
-        Warning,
-        [Description("error")]
-        Error
-    }
+    
 }

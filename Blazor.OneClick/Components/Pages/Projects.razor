@@ -1,31 +1,105 @@
 ﻿@page "/"
+@using Blazor.OneClick.Components.Pages.Shared
+@using Blazor.OneClick.Helpers
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
 @using MudBlazor
-@using global::OneClick.Data.Data
+
+@using global::OneClick.Data.Repositoties
+@using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.UseCases.Intefaces.OneClickProjects
 
 @attribute [Authorize]
 
 @inject IStringLocalizer<Projects> localize
+@inject IOneClickProjectRepositoty projectRepository
 
 <PageTitle>@localize["Projects"] | CopyTrader</PageTitle>
 
-<MudPaper  MinHeight ="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
     <MudStack Row="true" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Class="p-2 p-md-0">
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h5">@localize["Projects"]</MudText>
-            <MudText Typo="Typo.h5">(@projects?.Count)</MudText>
-            
+            <MudText Typo="Typo.h5">(@CopyTradeProjects?.Count())</MudText>
+
         </MudStack>
-
-
-
-        <MudButton Href="CreateProject" Class="btn-cust mb-2" Color="Color.Info" Variant="Variant.Filled">@localize["CreateProject"]</MudButton>
+        <MudButton Href="CreateProject" Class="btn-cust mb-2" Color="Color.Primary" Variant="Variant.Filled">@localize["CreateProject"]</MudButton>
     </MudStack>
+
+    @if (CopyTradeProjects.Count() == 0)
+    {
+        <div>@localize["ProjectsNotFound"]</div>
+    }
+    else
+    {
+        <MudTable Elevation="2" Items="CopyTradeProjects">
+            <HeaderContent>
+
+                <MudTh>@localize["Name"]</MudTh>
+                <MudTh>@localize["ServerName"]</MudTh>
+                <MudTh>@localize["Link"]</MudTh>
+                <MudTh>@localize["DailyFee"]</MudTh>
+                <MudTh>@localize["Traders"]</MudTh>
+                <MudTh>@localize["Investors"]</MudTh>
+                <MudTh>@localize["Owner"]</MudTh>
+                <MudTh>@localize["Created"]</MudTh>
+                <MudTh>@localize["Ping"]</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    @context.ProjectName
+
+                </MudTd>
+
+                <MudTd DataLabel="ProjectCount">@context.ServerName</MudTd>
+
+                <MudTd DataLabel="ProjectCount">
+                    <MudLink Href="@("http://"+context.ProjectDomain)" Target="_blank">
+                        <MudIcon title="@("http://"+context.ProjectDomain)" Color="Color.Dark" Icon="@Icons.Material.Filled.Link" Size="Size.Medium"></MudIcon>
+                    </MudLink>
+                </MudTd>
+
+                <MudTd DataLabel="ProjectCount">@context.DayFee</MudTd>
+                <MudTd DataLabel="ProjectCount">@context.TraderCount</MudTd>
+                <MudTd DataLabel="ProjectCount">@context.UserCount</MudTd>
+                <MudTd DataLabel="ProjectCount">@context.OwnerName</MudTd>
+                <MudTd DataLabel="ProjectCount">@_registeredDateFormat(Helper.UtcToLocalTime(context.CreateDate))</MudTd>
+                <MudTd DataLabel="ProjectCount">@Helper.TimeToCountdown(context.LastPing)</MudTd>
+
+            </RowTemplate>
+
+
+        </MudTable>
+    }
+
+    
+
 </MudPaper>
 
-@code{
-    private List<Project>? projects;
+@code {
+    //List<CopyTradingProject>? CopyTradeProjects { get; set; }
+    private IEnumerable<CopyTradingProject> CopyTradeProjects = new List<CopyTradingProject>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        CopyTradeProjects = await projectRepository.Get();
+        //Elements = CopyTradeProjects;
+
+        StateHasChanged();
+    }
+
+
+    private string _registeredDateFormat(DateTime date)
+    {
+        return date.ToString("d");
+    }
+
 }
 
 

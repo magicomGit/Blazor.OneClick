@@ -33,6 +33,8 @@
         public string? DefaultLanguage { get; set; }
         public List<Language>? Languages { get; set; }
         public double DayFee { get; set; }
+        public string AdminTelegram { get; set; }
+        public long AdminTelegramId { get; set; }
 
 
 
@@ -41,11 +43,10 @@
         {
 
         }
-        
-        public CopyTradingProject(int id, Guid ownerId, string ownerName, string projectDomain, string telegramBot,string telegramKey, string projectName,
+        public CopyTradingProject(int id, Guid ownerId, string ownerName, string projectDomain, string telegramBot, string telegramKey, string projectName,
             string serverIP, string serverName, int serverId, int proxyCount, int traderMaxCount, int userMaxCount, int traderCount, int userCount,
             DateTime createDate, DateTime lastPing, ProjectState state, List<ExchangeMarket> exchanges, ProjectPayment payment, string logo,
-            ProjectTariff tariff, string defaultLanguage, List<Language>languages, double dayFee)
+            ProjectTariff tariff, string defaultLanguage, List<Language> languages, double dayFee, string adminTelegram, long adminTelegramId)
         {
             Id = id;
             OwnerId = ownerId;
@@ -72,6 +73,8 @@
             DefaultLanguage = defaultLanguage;
             Languages = languages;
             DayFee = dayFee;
+            AdminTelegram = adminTelegram;
+            AdminTelegramId = adminTelegramId;
         }
 
     }

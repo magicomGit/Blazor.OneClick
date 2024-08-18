@@ -1,0 +1,28 @@
+﻿@using MudBlazor
+@using global::OneClick.Domain.Domain.OneClickProjects
+
+
+
+<MudTable Elevation="2" Items="Elements">
+    <HeaderContent>
+
+        <MudTh>Name</MudTh>
+        <MudTh>ServerName</MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd DataLabel="Name">
+            @context.ProjectName
+
+        </MudTd>
+        <MudTd DataLabel="ProjectCount">@context.ServerName</MudTd>
+
+    </RowTemplate>
+
+
+</MudTable>
+
+@code {
+    [Parameter] public List<CopyTradingProject>? Projects { get; set; }
+    private IEnumerable<CopyTradingProject> Elements = new List<CopyTradingProject>();
+}
