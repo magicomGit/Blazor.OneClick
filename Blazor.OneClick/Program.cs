@@ -9,6 +9,7 @@ using OneClick.UseCases.Intefaces.OneClickProjects;
 using OneClick.Data;
 using OneClick.Data.Data;
 using OneClick.Data.Repositoties;
+using OneClick.UseCases.Intefaces.App;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,7 +62,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddDefaultTokenProviders();
 
 //builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-builder.Services.AddData();
+//builder.Services.AddData();
 
 builder.Services.AddLocalization(options => {
     options.ResourcesPath = "Resources";
@@ -70,6 +71,7 @@ builder.Services.AddLocalization(options => {
 
 
 builder.Services.AddScoped<IOneClickProjectRepositoty, OneClickProjectRepositoty>();
+builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 
 var app = builder.Build();
 

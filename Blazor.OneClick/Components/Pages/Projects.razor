@@ -5,14 +5,18 @@
 @using Microsoft.Extensions.Localization
 @using MudBlazor
 
+@using global::OneClick.Data.Helpers
 @using global::OneClick.Data.Repositoties
 @using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
 @attribute [Authorize]
 
 @inject IStringLocalizer<Projects> localize
 @inject IOneClickProjectRepositoty projectRepository
+@inject IAppSettingsRepository settingsRepository
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>@localize["Projects"] | CopyTrader</PageTitle>
 
@@ -32,11 +36,14 @@
     }
     else
     {
-        <MudTable Elevation="2" Items="CopyTradeProjects">
+        <MudTable Hover Elevation="2" Items="CopyTradeProjects">
             <HeaderContent>
 
                 <MudTh>@localize["Name"]</MudTh>
-                <MudTh>@localize["ServerName"]</MudTh>
+                @if (IsAdmin)
+                {
+                    <MudTh>@localize["Server"]</MudTh>
+                }
                 <MudTh>@localize["Link"]</MudTh>
                 <MudTh>@localize["DailyFee"]</MudTh>
                 <MudTh>@localize["Traders"]</MudTh>
@@ -47,25 +54,55 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name">
-                    @context.ProjectName
+                <MudTd DataLabel="@localize["Name"]">
+                    <MudStack Row Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
 
+                        <MudAvatar Size="Size.Medium">
+                            <MudImage Src="@context.Logo"></MudImage>
+                        </MudAvatar>
+                        @if (context.State == ProjectState.Ready)
+                        {
+                            <MudLink Style="font-weight:bold" Underline="Underline.None" Color="Color.Primary" Href="@("AppProject/"+context.Id)">@context.ProjectName</MudLink>
+                        }
+                        else
+                        {
+                            <MudLink Style="font-weight:bold" Underline="Underline.None" title="@context.State.ToString()" Color="Color.Error" Href="@("AppProject/"+context.Id)">@context.ProjectName</MudLink>
+                        }
+
+                    </MudStack>
                 </MudTd>
 
-                <MudTd DataLabel="ProjectCount">@context.ServerName</MudTd>
+                @if (IsAdmin)
+                {
+                    <MudTd DataLabel="@localize["Server"]">
+                        <MudLink Color="Color.Primary" Href="@("AppServer/"+context.ServerId)" Target="_blank">@context.ServerName</MudLink>
+                    </MudTd>
 
-                <MudTd DataLabel="ProjectCount">
-                    <MudLink Href="@("http://"+context.ProjectDomain)" Target="_blank">
-                        <MudIcon title="@("http://"+context.ProjectDomain)" Color="Color.Dark" Icon="@Icons.Material.Filled.Link" Size="Size.Medium"></MudIcon>
+                }
+
+                <MudTd DataLabel="@localize["Link"]">
+                    <MudLink Href="@("https://"+context.ProjectDomain)" Target="_blank">
+                        <MudIcon title="@("https://"+context.ProjectDomain)" Color="Color.Primary" Icon="@Icons.Material.Filled.Link" Size="Size.Medium"></MudIcon>
                     </MudLink>
                 </MudTd>
 
-                <MudTd DataLabel="ProjectCount">@context.DayFee</MudTd>
-                <MudTd DataLabel="ProjectCount">@context.TraderCount</MudTd>
-                <MudTd DataLabel="ProjectCount">@context.UserCount</MudTd>
-                <MudTd DataLabel="ProjectCount">@context.OwnerName</MudTd>
-                <MudTd DataLabel="ProjectCount">@_registeredDateFormat(Helper.UtcToLocalTime(context.CreateDate))</MudTd>
-                <MudTd DataLabel="ProjectCount">@Helper.TimeToCountdown(context.LastPing)</MudTd>
+                <MudTd DataLabel="@localize["DailyFee"]">$ @context.DayFee</MudTd>
+                <MudTd DataLabel="@localize["Traders"]">@context.TraderCount</MudTd>
+                <MudTd DataLabel="@localize["Investors"]">@context.UserCount</MudTd>
+
+                <MudTd DataLabel="@localize["Owner"]">
+                    @if (IsAdmin)
+                    {
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.OwnerId)">@context.OwnerName</MudLink>
+                    }
+                    else
+                    {
+                        @context.OwnerName
+                    }
+                </MudTd>
+
+                <MudTd DataLabel="@localize["Created"]">@_registeredDateFormat(Helper.UtcToLocalTime(context.CreateDate))</MudTd>
+                <MudTd DataLabel="@localize["Ping"]">@Helper.TimeToCountdown(context.LastPing)</MudTd>
 
             </RowTemplate>
 
@@ -73,13 +110,14 @@
         </MudTable>
     }
 
-    
 
 </MudPaper>
 
 @code {
     //List<CopyTradingProject>? CopyTradeProjects { get; set; }
     private IEnumerable<CopyTradingProject> CopyTradeProjects = new List<CopyTradingProject>();
+    private bool IsAdmin { get; set; }
+    private AuthenticationState? AuthState { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -88,7 +126,27 @@
             return;
         }
 
+        AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        IsAdmin = UserHelper.CheckIsAdmin(AuthState);
+
         CopyTradeProjects = await projectRepository.Get();
+        StateHasChanged();
+
+        var servicesPrice = await settingsRepository.GetServicesPrices();
+
+
+        foreach (var project in CopyTradeProjects)
+        {
+            var projectDayFee = ProjectHelper.GetProjectPaymentAmount(project, servicesPrice);
+            project.DayFee = Math.Round(projectDayFee, 2);
+
+            var logo = await projectRepository.GetProjectLogoMini(project.Id);
+            if (logo != string.Empty)
+            {
+                project.Logo = logo;
+            }
+        }
+
         //Elements = CopyTradeProjects;
 
         StateHasChanged();

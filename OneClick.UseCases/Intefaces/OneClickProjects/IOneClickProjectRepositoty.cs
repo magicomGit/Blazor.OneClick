@@ -6,7 +6,11 @@ namespace OneClick.UseCases.Intefaces.OneClickProjects
     {
         Task<List<CopyTradingProject>> Get();
 
-        Task<CopyTradingProject> GetById(long id);
+        Task<string> GetProjectLogo(int projectId);
+
+        Task<string> GetProjectLogoMini(int projectId);
+
+        Task<CopyTradingProject> GetById(int id);
 
         Task<int> Create(CopyTradingProject project);
 

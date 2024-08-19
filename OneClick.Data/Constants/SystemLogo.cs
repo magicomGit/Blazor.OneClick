@@ -1,4 +1,4 @@
-﻿namespace Blazor.OneClick.Constants
+﻿namespace OneClick.Data.Constants
 {
     public static class SystemLogo
     {

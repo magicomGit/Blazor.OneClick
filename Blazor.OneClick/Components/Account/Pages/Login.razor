@@ -8,6 +8,7 @@
 @using Microsoft.Extensions.Localization
 @using MudBlazor
 @using System.Text.RegularExpressions
+@using global::OneClick.Data.Constants
 @using global::OneClick.Data.Data
 
 
@@ -50,18 +51,18 @@
 
            
             
-                <MudButton FullWidth Class="btn-cust w-100" Size="Size.Large" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">@localize["LoginButton"]</MudButton>
+                <MudButton FullWidth Class="btn-cust w-100" Size="Size.Large" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@localize["LoginButton"]</MudButton>
 
             
             <div style="text-align:center" class=" my-3">
                 <p>
                     <div>
                         @localize["RegisterLable"]
-                        <MudLink Color="Color.Info" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">@localize["RegisterLink"]</MudLink>
+                        <MudLink Color="Color.Primary" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">@localize["RegisterLink"]</MudLink>
                     </div>
                     <div>
                         @localize["ForgotLable"]
-                        <MudLink Color="Color.Info" Href="Account/ForgotPasswordTelegram">@localize["ForgotLink"]</MudLink>
+                        <MudLink Color="Color.Primary" Href="Account/ForgotPasswordTelegram">@localize["ForgotLink"]</MudLink>
                     </div>
                 </p>
 

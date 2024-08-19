@@ -4,6 +4,24 @@
 
 */
 
+@font-face {
+    font-family: Nunito;
+    src: url(../Fonts/Nunito/Nunito-Regular.ttf);
+}
+
+body {
+    background-color: #eeeeee;
+    font-family: 'Nunito' !important;
+}
+
+.mud-typography {
+    font-family: 'Nunito' !important;
+}
+
+body a {
+    color: var(--mud-palette-primary) ;
+}
+
 @media (min-width: 960px){
     .cust-block{
         padding: 20px !important;

@@ -32,4 +32,12 @@ namespace OneClick.Data.Enums
         SourceProjectDeleted,
         RelocateFailure
     }
+
+    public enum ProjectDataNames
+    {
+        Domains,
+        Avatar,
+        AvatarMini,
+        None
+    }
 }

@@ -8,11 +8,13 @@ namespace Blazor.OneClick.Static
         {
             PaletteLight = new PaletteLight()
             {
+                Primary = "#372ca1",
                 Secondary = "#888ea8",
                 Tertiary = "#081344"
             },
             PaletteDark = new PaletteDark()
             {
+                Primary = "#897feb",
                 Secondary = "#242f3d",
                 Tertiary = "#17212b",
             },
