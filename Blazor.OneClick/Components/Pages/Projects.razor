@@ -8,6 +8,7 @@
 @using global::OneClick.Data.Helpers
 @using global::OneClick.Data.Repositoties
 @using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.Domain.Domain.OneClickProjects.ValueObjects
 @using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
@@ -20,7 +21,7 @@
 
 <PageTitle>@localize["Projects"] | CopyTrader</PageTitle>
 
-<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">    
     <MudStack Row="true" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Class="p-2 p-md-0">
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h5">@localize["Projects"]</MudText>
@@ -126,10 +127,24 @@
             return;
         }
 
+        // var ex = new List<ExchangeMarket>();
+        // var lg = new List<Language>();
+        // var pay = new ProjectPayment();
+
+        // var botRes = TelegramBot.Create("sdf", "dfghd");
+
+        // var projRes = await projectRepository.Create(new CopyTradingProject(0, new Guid(), "", "", botRes.Value, "", "", "",0,0,0,0,0,0, DateTime.Now, DateTime.Now, ProjectState.Creating, 
+        // ex, pay, "", ProjectTariff.Start, "",lg,0,"",0));
+
+
         AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         IsAdmin = UserHelper.CheckIsAdmin(AuthState);
 
         CopyTradeProjects = await projectRepository.Get();
+        if (CopyTradeProjects == null)
+        {
+            return;
+        }
         StateHasChanged();
 
         var servicesPrice = await settingsRepository.GetServicesPrices();
@@ -146,8 +161,6 @@
                 project.Logo = logo;
             }
         }
-
-        //Elements = CopyTradeProjects;
 
         StateHasChanged();
     }

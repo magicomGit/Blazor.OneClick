@@ -84,12 +84,18 @@ namespace OneClick.Data.Dto
         public static CopyTradingProject ProjectDto(Project p)
         {
             var config = GetProjectConfig(p.ProjectConfig);
+            var telegramBotResult = TelegramBot.Create(config.TelegramName, config.TelegramKey);
 
-            var project = new CopyTradingProject(p.Id, p.OwnerId, p.OwnerName, p.ProjectDomain, p.TelegramBot, p.TelegramKey,
+            TelegramBot telegramBot;
+            if (!telegramBotResult.IsSuccess)
+            {
+                return null;
+            }
+
+            var project = new CopyTradingProject(p.Id, p.OwnerId, p.OwnerName, p.ProjectDomain, telegramBotResult.Value,
                 p.ProjectName, p.ServerIP, p.ServerName, 0, p.ProxyCount, p.TraderMaxCount, p.UserMaxCount, p.TraderCount, p.UserCount,
                 p.CreateDate, p.LastPing, p.State, config.Exchanges, PaymentDto(p.Payment), string.Empty, config.Tariff,
                 config.DefaultLanguage, config.Languages, 0, config.AdminTelegram, config.AdminTelegramId);
-
 
 
             return project;

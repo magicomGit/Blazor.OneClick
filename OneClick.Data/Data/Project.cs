@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OneClick.Data.Enums;
 using OneClick.Domain.Domain.OneClickProjects;
+using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
 
 
 namespace OneClick.Data.Data

@@ -1,4 +1,8 @@
-﻿namespace OneClick.Domain.Domain.OneClickProjects
+﻿using CSharpFunctionalExtensions;
+using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace OneClick.Domain.Domain.OneClickProjects
 {
     public class CopyTradingProject
     {
@@ -6,7 +10,7 @@
         public Guid OwnerId { get; set; }
         public string? OwnerName { get; set; }
         public string? ProjectDomain { get; set; }
-        public string? TelegramBot { get; set; }
+        public TelegramBot TelegramBot { get; }
         public string? TelegramKey { get; set; }
         public string? ProjectName { get; set; }
         public string? ServerIP { get; set; }
@@ -23,7 +27,7 @@
         public ProjectState State { get; set; }
 
         public List<ExchangeMarket> Exchanges { get; set; }
-       
+
         public bool BillingEnabled { get; set; }
         public bool CrossTradingEnabled { get; set; }
         public bool Synchronized { get; set; }
@@ -43,7 +47,7 @@
         {
 
         }
-        public CopyTradingProject(int id, Guid ownerId, string ownerName, string projectDomain, string telegramBot, string telegramKey, string projectName,
+        public CopyTradingProject(int id, Guid ownerId, string ownerName, string projectDomain, TelegramBot telegramBot, string projectName,
             string serverIP, string serverName, int serverId, int proxyCount, int traderMaxCount, int userMaxCount, int traderCount, int userCount,
             DateTime createDate, DateTime lastPing, ProjectState state, List<ExchangeMarket> exchanges, ProjectPayment payment, string logo,
             ProjectTariff tariff, string defaultLanguage, List<Language> languages, double dayFee, string adminTelegram, long adminTelegramId)
@@ -52,8 +56,7 @@
             OwnerId = ownerId;
             OwnerName = ownerName;
             ProjectDomain = projectDomain;
-            TelegramBot = telegramBot;
-            TelegramKey = telegramKey;
+            TelegramBot = telegramBot;            
             ProjectName = projectName;
             ServerIP = serverIP;
             ServerName = serverName;
@@ -82,11 +85,22 @@
 
 
 
-    public class Language
-    {
-        public string? Code { get; set; }
-        public string? Name { get; set; }
-    }
+
+
+   
+
+
+
+
+
+
+
+    
+
+
+
+
+
 
 
     public enum ProjectTariff
