@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OneClick.Domain.Domain.OneClickProjects
+﻿namespace OneClick.Domain.Domain.OneClickProjects
 {
     public class ProjectPayment
     {
@@ -15,6 +9,6 @@ namespace OneClick.Domain.Domain.OneClickProjects
         public DateTime LastDeleteReminded { get; set; }
         public bool IsFreezeReminded { get; set; }
         public bool IsDeleteReminded { get; set; }
-        
+
     }
 }
