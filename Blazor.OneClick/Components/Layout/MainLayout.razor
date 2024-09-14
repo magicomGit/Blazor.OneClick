@@ -12,21 +12,38 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Elevation="1" Color="Color.Tertiary">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+            <MudAppBar Elevation="0" Color="Color.Tertiary">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Class=" d-md-none" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <div class="d-none d-md-block">
+                    <MudStack Row>
+                        <MudImage Width="40" Src="img/logo-200.png"></MudImage>
+                        <MudText Typo="Typo.h5" Class="ml-3">CopyTrader</MudText>
+                    </MudStack>
+                </div>
+
                 <MudSpacer />
                 <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
 
 
             </MudAppBar>
-            <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-lg-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
+
+
+            <MudPaper Elevation="1" Height="64px" Class="d-none d-md-block" Style="margin-top: 64px;" Color="Color.Surface">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Class=" d-md-none" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            </MudPaper>
+
+
+            <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-md-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
+                <MudStack Row>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => DrawerToggle())" />
+                </MudStack>
+
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
             </MudDrawer>
 
-            <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
+            <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
                 <NavMenu />
             </MudDrawer>
             <MudMainContent>
@@ -36,10 +53,10 @@
     </Authorized>
     <NotAuthorized>
         <MudLayout>
-           
-            
-                @Body
-           
+
+
+            @Body
+
         </MudLayout>
     </NotAuthorized>
 </AuthorizeView>
