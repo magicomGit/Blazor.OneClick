@@ -20,4 +20,11 @@ namespace OneClick.Domain.Enums.Customer
         [Description("error")]
         Error
     }
+
+    public enum UserTheme
+    {
+        Light,
+        Dark,
+
+    }
 }

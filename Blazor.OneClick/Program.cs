@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using OneClick.UseCases.Intefaces.OneClickProjects;
-using OneClick.Data;
 using OneClick.Data.Data;
 using OneClick.Data.Repositoties;
 using OneClick.UseCases.Intefaces.App;
+using OneClick.UseCases.Intefaces.OneClickProjects;
+using OneClick.UseCases.Intefaces.User;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,14 +64,17 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 //builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 //builder.Services.AddData();
 
-builder.Services.AddLocalization(options => {
+builder.Services.AddLocalization(options =>
+{
     options.ResourcesPath = "Resources";
 
 });
 
 
 builder.Services.AddScoped<IOneClickProjectRepositoty, OneClickProjectRepositoty>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

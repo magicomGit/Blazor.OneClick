@@ -2,6 +2,7 @@
 using OneClick.Data.Data;
 using OneClick.Data.Enums;
 using OneClick.Domain.Domain.OneClickProjects;
+using OneClick.Domain.Enums.Customer;
 
 namespace OneClick.Data.Dto
 {

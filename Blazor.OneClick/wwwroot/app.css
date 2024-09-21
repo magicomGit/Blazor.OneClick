@@ -26,6 +26,11 @@ body a {
     .cust-block{
         padding: 20px !important;
     }
+
+    .content {
+        margin-top: var(--mud-appbar-height);
+        padding-top:0 !important;
+    }
 }
 
 

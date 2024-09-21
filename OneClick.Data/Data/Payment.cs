@@ -1,4 +1,5 @@
 ﻿using OneClick.Data.Enums;
+using OneClick.Domain.Enums.Customer;
 
 namespace OneClick.Data.Data
 {

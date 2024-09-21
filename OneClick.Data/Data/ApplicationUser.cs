@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using OneClick.Domain.Enums.Customer;
 
 namespace OneClick.Data.Data
 {
@@ -16,6 +17,7 @@ namespace OneClick.Data.Data
         public DateTime LastActivity { get; set; }
         public virtual AccountPayment? PaymentInfo { get; set; }
         public string? Language { get; set; }
+        public UserTheme Theme { get; set; }
     }
 
     public class Balance
@@ -44,4 +46,7 @@ namespace OneClick.Data.Data
         Active,
         None
     }
+
+
+    
 }
