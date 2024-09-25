@@ -13,6 +13,6 @@ namespace OneClick.Data.Data
         public bool IsFreezeReminded { get; set; }
         public bool IsDeleteReminded { get; set; }
         public string? Message { get; set; }
-        public Severity Severity { get; set; }
+        public AppSeverity Severity { get; set; }
     }
 }

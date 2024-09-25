@@ -17,10 +17,10 @@ namespace Blazor.OneClick.Constants
         public static readonly string OneClickServerLogin = "magicom@yandex.ru";
         public static readonly string OneClickServerPass = "Guj7uGuj7u!";
 
-        public static readonly string TelegramBotInit = "CopyTrader_Robot";
-        public static readonly string TelegramBotKeyInit = "5957597423:AAEQXtPTJjiMbhdLMKwbPpt5EIOxLCrX1TU";
-        //public static readonly string TelegramBotInit = "magicomTrader_bot";
-        //public static readonly string TelegramBotKeyInit = "6845717373:AAGPBo2mGTXPEHebCFiQvO5oULvg7j6RG00";
+        //public static readonly string TelegramBotInit = "CopyTrader_Robot";
+        //public static readonly string TelegramBotKeyInit = "5957597423:AAEQXtPTJjiMbhdLMKwbPpt5EIOxLCrX1TU";
+        public static readonly string TelegramBotInit = "magicomTrader_bot";
+        public static readonly string TelegramBotKeyInit = "6845717373:AAGPBo2mGTXPEHebCFiQvO5oULvg7j6RG00";
         public static readonly string TimeWebKey = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCIsImtpZCI6IjFrYnhacFJNQGJSI0tSbE1xS1lqIn0.eyJ1c2VyIjoieno4OTgzMyIsInR5cGUiOiJhcGlfa2V5IiwicG9ydGFsX3Rva2VuIjoiNjM5MGY1YTYtNDU3YS00MDc2LTk1ZjctYzk4MWRiZWMyYjgwIiwiYXBpX2tleV9pZCI6ImE5ZDA2Y2ZkLTU1ODEtNDRlZC1iODcyLWUyNDRlNzM3NmRlZCIsImlhdCI6MTcxMDc3NzEzMn0.xQSmwjWks1uNOAw9tF1M-be1FQZCrpvuVJA1tDRrGILWhILm1OQWkq80AZcy6OvYCbWQcxcAw0GOTdsu4qTqS-Em9ethvB94hGR7gp6nyEeuQakm8N7xksauNsSbLEOaBgr3CzrM7YQcxHIEXn2qlc-ygEMSfkGssyaMct9HE-GfZJ8kLNWSiW1X2dCSHr8IqfchaaRBFnQVaHZUQlGBhjrioc78dxpFB5ukn-hmn4p-w-Fl_nwqmtkA1c1Z5yz0DYdp6B2JjaJvzYz5ScRRlTRzEXcPdCkP_43i8vfmalH3hYZgNQLV6qZgKMSn4Fmul7CY5V0U7qYAduA6mwxS6zZSExYpxU6cO0nUc5fBBxUCJ6plg44yct4knwymGWPZfuZyezJfdUsNipCRD7p74_-Dq135jmsH0xKl2GKoj_gAOAyjrmeBkrQHjlCNVZqF_-InB0UcW6uIrLTrm3u4BEc4D35m8x7eGI_afhwsEx21T602oTbsbRlfou2T6ZxQ";
 
         public static readonly string OneClickDomain = "copytrader.pw";

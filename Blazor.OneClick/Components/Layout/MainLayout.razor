@@ -2,12 +2,18 @@
 @using Blazor.OneClick.Static
 @using Microsoft.Extensions.Caching.Memory
 @using MudBlazor
+@using global::OneClick.Data.Data
+@using global::OneClick.Data.Helpers
 @using global::OneClick.Domain.Enums.Customer
+@using global::OneClick.Domain.Enums.Transaction
 @using global::OneClick.UseCases.Intefaces.User
 @inherits LayoutComponentBase
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationStateProvider _authenticationStateProvider
 @inject IUserRepository _userRepository
-@inject IMemoryCache Cache
+@inject IMemoryCache _cache
+@inject NavigationManager _navigationManager
+@inject ApplicationDbContext _context
+@inject AppLogger _logger
 
 
 <style>
@@ -59,7 +65,7 @@
             </MudDrawer>
 
             <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
-                <NavMenu />
+                <NavMenu  NewTransactionCount="_newTransactionCount"/>
             </MudDrawer>
             <MudMainContent Class="content">
                 @Body
@@ -85,27 +91,50 @@
     private bool _dark = false;
     private string _darkModeIcon = Icons.Material.Outlined.DarkMode;
     private UserData? _userData { get; set; }
+    private int _newTransactionCount { get; set; }
 
     private AuthenticationState? AuthState { get; set; }
 
-   // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
     protected override async Task OnInitializedAsync()
     {
-        // if (!firstRender)
-        // {
-        //     return;
-        // }
-        if (HttpContext == null)
+
+        if (HttpContext != null)
         {
-            // return;
+            if (!CheckSecurity(_cache, HttpContext, _context))
+            {
+                if (HttpContext.Request.Path.ToString().Contains("AccessDenied"))
+                {
+                    return;
+                }
+                _navigationManager.NavigateTo("AccessDenied?message=Too%20Many%20Requests");
+            }
+
+            if (HttpContext.Request.Path.ToString().Contains("LoginAsUser"))
+            {
+                return;
+            }
+        }
+
+        //transactions cache
+        if (!_cache.TryGetValue("NewTransactionCount", out int Count))
+        {
+            _newTransactionCount = _context.Transactions.Where(x => x.Status == TransactionStatus.Await).Count();
+            _cache.Set("NewTransactionCount", _newTransactionCount, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(60)));
+            StateHasChanged();
+        }
+        else
+        {
+            _newTransactionCount = Count;
         }
 
         //user Data
-        AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        AuthState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         if (AuthState.User.Identity.IsAuthenticated)
         {
+           
             var userName = AuthState.User.Identity.Name;
-            if (!Cache.TryGetValue("UserName" + userName, out UserData data))
+            if (!_cache.TryGetValue("UserName" + userName, out UserData data))
             {
                 var user = await _userRepository.GetUserByNameAsync(AuthState.User.Identity.Name, true, false, false);
                 if (user == null)
@@ -136,7 +165,7 @@
                 }
 
 
-                Cache.Set("UserName" + AuthState.User.Identity.Name, _userData, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(30)));
+                _cache.Set("UserName" + AuthState.User.Identity.Name, _userData, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(30)));
             }
             else
             {
@@ -158,7 +187,7 @@
 
 
 
-            StateHasChanged();
+          
         }
 
     }
@@ -182,32 +211,70 @@
 
         if (_dark)
         {
-            switch (_dark)
-            {
-                case true:
-                    _userData.Theme = UserTheme.Dark; break;
-                case false:
-                    _userData.Theme = UserTheme.Light; break;
-                default:
-                    break;
-            }
+
+            _userData.Theme = UserTheme.Dark;
             await _userRepository.UpdateThemeAsync(_userData.UserId, _userData.Theme);
             _darkModeIcon = Icons.Material.Filled.DarkMode;
         }
         else
         {
-            _darkModeIcon = Icons.Material.Outlined.DarkMode;
-            switch (_dark)
-            {
-                case true:
-                    _userData.Theme = UserTheme.Dark; break;
-                case false:
-                    _userData.Theme = UserTheme.Light; break;
-                default:
-                    break;
-            }
+
+            _userData.Theme = UserTheme.Light;
             await _userRepository.UpdateThemeAsync(_userData.UserId, _userData.Theme);
+            _darkModeIcon = Icons.Material.Outlined.DarkMode;
         }
+    }
+
+
+     bool CheckSecurity(IMemoryCache cache, HttpContext httpContext, ApplicationDbContext _context)
+    {
+        int expirationOffset = 1;
+        int blockOffset = 60;
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString();
+
+
+
+        if (clientIp != null)
+        {
+            if (cache.TryGetValue(clientIp + "Blocked", out string? IPBlocked))
+            {
+                return false;
+            }
+
+
+            if (cache.TryGetValue(clientIp, out IPCounter? IPCount))
+            {
+                // if (IPCount != null)
+                {
+                    if (DateTimeOffset.UtcNow > IPCount.Expiration)
+                    {
+                        IPCount.Expiration = DateTimeOffset.UtcNow.AddSeconds(expirationOffset);
+                        IPCount.Count = 0;
+                    }
+                    IPCount.Count++;
+                    cache.Set(clientIp, IPCount, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(120)));
+
+                    if (IPCount.Count > 5)
+                    {
+                        cache.Set(clientIp + "Blocked", clientIp, DateTimeOffset.UtcNow.AddSeconds(blockOffset));
+                        _logger.LogError(clientIp + " адрес заблокирован на " + blockOffset + " секунд");
+                        return false;
+
+                    }
+                }
+
+
+            }
+            else
+            {
+                cache.Set(clientIp, new IPCounter { IPAddress = clientIp, Expiration = DateTimeOffset.UtcNow.AddSeconds(expirationOffset) },
+                    DateTimeOffset.UtcNow.AddSeconds(120));
+                return true;
+            }
+        }
+
+
+        return true;
     }
 }
 

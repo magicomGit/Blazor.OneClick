@@ -1,15 +1,18 @@
 using Blazor.OneClick.Components;
 using Blazor.OneClick.Components.Account;
 using Blazor.OneClick.Constants;
+using Blazor.OneClick.TelegramBot;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using OneClick.Data.Data;
+using OneClick.Data.Helpers;
 using OneClick.Data.Repositoties;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.OneClickProjects;
 using OneClick.UseCases.Intefaces.User;
+using Telegram.Bot;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +43,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //    options.UseLazyLoadingProxies()
 //     .UseSqlServer(Settings.ConnectionString));
 
+
+builder.Services.AddSingleton<ITelegramBotClient, TelegramBotClient>(opt => new TelegramBotClient(Settings.TelegramBotKeyInit)).AddSingleton<TelegramBotEngine>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -75,6 +80,7 @@ builder.Services.AddScoped<IOneClickProjectRepositoty, OneClickProjectRepositoty
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<AppLogger>();
 
 var app = builder.Build();
 

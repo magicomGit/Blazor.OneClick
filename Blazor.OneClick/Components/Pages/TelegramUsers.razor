@@ -1,0 +1,385 @@
+﻿@page "/TelegramUsers"
+
+@using Blazor.OneClick.Components.Pages.Shared
+@using Blazor.OneClick.Components.Pages.Shared.Modals
+@using Blazor.OneClick.Constants
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using global::OneClick.Data.Data
+
+@attribute [Authorize(Roles = Settings.AdminRole)]
+
+
+@inject ApplicationDbContext _context
+@inject IDialogService _dialogService
+
+<PageTitle>Пользователи | CopyTrader</PageTitle>
+
+
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    <h3>Пользователи @("(" + UsersCount + ")")</h3>
+
+
+    @if (users.Count == 0)
+    {
+        <MudSkeleton Height="10" />
+        <MudSkeleton Animation="Animation.False" Height="70px" />
+        <MudSkeleton Animation="Animation.Wave" Height="100px" />
+        <MudSkeleton Animation="Animation.False" Height="90px" />
+        <MudSkeleton Animation="Animation.Wave" Height="130px" />
+        <MudSkeleton Animation="Animation.False" Height="50px" />
+        <MudSkeleton Animation="Animation.Wave" Height="100px" />
+    }
+    else
+    {
+        <div class="row justify-content-start gap-3 col-md-10">
+
+            <div class="col-md-5 col-lg-4 my-3 ">
+                <div class="input-group">
+                    <label class="input-group-text" for="inputGroupStatus">Статус</label>
+                    <select class="form-select" id="inputGroupStatus" @onchange="SetStatusFilter">
+                        <option selected value=@UserStatus.None>Все</option>
+                        <option value=@UserStatus.Active>Зарегистрирован в системе</option>
+                        <option value=@UserStatus.Frozen>Гость</option>
+                    </select>
+                </div>
+            </div>
+
+
+        </div>
+
+        <MudTable Hover Elevation="2" Items="CopyTradeProjects">
+            <HeaderContent>
+
+                <MudTh>@localize["Name"]</MudTh>
+                @if (IsAdmin)
+                {
+                    <MudTh>@localize["Server"]</MudTh>
+                }
+                <MudTh>@localize["Link"]</MudTh>
+                <MudTh>@localize["DailyFee"]</MudTh>
+                <MudTh>@localize["Traders"]</MudTh>
+                <MudTh>@localize["Investors"]</MudTh>
+                <MudTh>@localize["Owner"]</MudTh>
+                <MudTh>@localize["Created"]</MudTh>
+                <MudTh>@localize["Ping"]</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="@localize["Name"]">
+                    <MudStack Row Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+
+                        <MudAvatar Size="Size.Medium">
+                            <MudImage Src="@context.Logo"></MudImage>
+                        </MudAvatar>
+                        @if (context.State == ProjectState.Ready)
+                        {
+                            <MudLink Style="font-weight:bold" Underline="Underline.None" Color="Color.Primary" Href="@("AppProject/"+context.Id)">@context.ProjectName</MudLink>
+                        }
+                        else
+                        {
+                            <MudLink Style="font-weight:bold" Underline="Underline.None" title="@context.State.ToString()" Color="Color.Error" Href="@("AppProject/"+context.Id)">@context.ProjectName</MudLink>
+                        }
+
+                    </MudStack>
+                </MudTd>
+
+                @if (IsAdmin)
+                {
+                    <MudTd DataLabel="@localize["Server"]">
+                        <MudLink Color="Color.Primary" Href="@("AppServer/"+context.ServerId)" Target="_blank">@context.ServerName</MudLink>
+                    </MudTd>
+
+                }
+
+                <MudTd DataLabel="@localize["Link"]">
+                    <MudLink Href="@("https://"+context.ProjectDomain)" Target="_blank">
+                        <MudIcon title="@("https://"+context.ProjectDomain)" Color="Color.Primary" Icon="@Icons.Material.Filled.Link" Size="Size.Medium"></MudIcon>
+                    </MudLink>
+                </MudTd>
+
+                <MudTd DataLabel="@localize["DailyFee"]">$ @context.DayFee</MudTd>
+                <MudTd DataLabel="@localize["Traders"]">@context.TraderCount</MudTd>
+                <MudTd DataLabel="@localize["Investors"]">@context.UserCount</MudTd>
+
+                <MudTd DataLabel="@localize["Owner"]">
+                    @if (IsAdmin)
+                    {
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.OwnerId)">@context.OwnerName</MudLink>
+                    }
+                    else
+                    {
+                        @context.OwnerName
+                    }
+                </MudTd>
+
+                <MudTd DataLabel="@localize["Created"]">@_registeredDateFormat(Helper.UtcToLocalTime(context.CreateDate))</MudTd>
+                <MudTd DataLabel="@localize["Ping"]">@Helper.TimeToCountdown(context.LastPing)</MudTd>
+
+            </RowTemplate>
+
+
+        </MudTable>
+        
+
+
+        <MudStack Row Justify="Justify.Center" Class="my-2">
+            <MudPagination Variant="Variant.Text" ShowFirstButton="true" ShowLastButton="true" Count="PagesQuantity" SelectedChanged="PageChanged" />
+        </MudStack>
+
+        <div class="d-flex justify-content-end my-4">
+            <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" OnClick="SendMessageModal">Рассылка</MudButton>
+            <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" OnClick="CreateUsers">Создать пользователей из OneClick</MudButton>
+        </div>
+
+    }
+</MudPaper>
+
+
+
+@code {
+    private List<TelegramUser>? users = new List<TelegramUser>();
+    private List<TelegramUser> usersUI = new List<TelegramUser>();
+    private List<TelegramUser> filteredUsersUI = new List<TelegramUser>();
+    private FilterModel Filter { get; set; } = new();
+    private int UsersCount { get; set; }
+    private int PagesQuantity { get; set; }
+    private int ItemsPerPage { get; set; } = 10;
+    private int SelectedPageIndex { get; set; } = 1;
+    private string SortName { get; set; } = string.Empty;
+    private bool SortDesc { get; set; }
+    IQueryable<TelegramUser> UsersRequest { get; set; }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            UsersCount = await _context.TelegramUsers.CountAsync();
+            GetPaginationData();
+
+            await FilterApply();
+
+        }
+
+    }
+
+    void GetPaginationData()
+    {
+
+        PagesQuantity = UsersCount / ItemsPerPage;
+        if (UsersCount - (PagesQuantity * ItemsPerPage) > 0)
+        {
+            PagesQuantity++;
+        }
+        if (SelectedPageIndex > PagesQuantity)
+        {
+            if (PagesQuantity == 0)
+            {
+                SelectedPageIndex = 1;
+            }
+            else
+            {
+                SelectedPageIndex = PagesQuantity;
+            }
+        }
+    }
+
+    private async Task GetData(string title, bool sortedDesc)
+    {
+
+        switch (title)
+        {
+            case "Name":
+                if ((bool)sortedDesc)
+                {
+                    users = await UsersRequest.OrderByDescending(x => x.Name)
+                    .Skip(ItemsPerPage * (SelectedPageIndex - 1)).Take(ItemsPerPage).ToListAsync();
+                }
+                else
+                {
+                    users = await UsersRequest.OrderBy(x => x.Name)
+                    .Skip(ItemsPerPage * (SelectedPageIndex - 1)).Take(ItemsPerPage).ToListAsync();
+                }
+                break;
+
+
+
+
+
+            case "Registered":
+                if ((bool)sortedDesc)
+                {
+                    users = await UsersRequest.OrderByDescending(x => x.Registered)
+                    .Skip(ItemsPerPage * (SelectedPageIndex - 1)).Take(ItemsPerPage).ToListAsync();
+                }
+                else
+                {
+                    users = await UsersRequest.OrderBy(x => x.Registered)
+                    .Skip(ItemsPerPage * (SelectedPageIndex - 1)).Take(ItemsPerPage).ToListAsync();
+                }
+                break;
+
+            default:
+
+                users = await UsersRequest.OrderByDescending(x => x.Registered)
+                .Skip(ItemsPerPage * (SelectedPageIndex - 1)).Take(ItemsPerPage).ToListAsync();
+
+                //users = await UsersRequest.ToListAsync();
+                break;
+        }
+
+
+        // usersUI.Clear();
+        // filteredUsersUI.Clear();
+        // foreach (var user in users)
+        // {
+        //     //var userUI = await UserDto.GetUserIU(_context, UserManager, user);
+        //     usersUI.Add(user);
+        //     filteredUsersUI.Add(user);
+
+        // }
+
+        StateHasChanged();
+    }
+
+    private async Task PageChanged(int index)
+    {
+        SelectedPageIndex = index;
+        await FilterApply();
+    }
+
+    private async void SendMessageModal()
+    {
+        var options = new DialogOptions() { CloseButton = true,   MaxWidth = MaxWidth.Large };
+
+        var parameters = new DialogParameters<MessageToBotUsers>();
+
+
+
+        // parameters.Add(x => x._context, _context);
+
+        var dialog = await _dialogService.ShowAsync<MessageToBotUsers>("Мессенджер", parameters, options);
+        var dialogResult = await dialog.Result;
+        if (!dialogResult.Canceled)
+        {
+
+
+        }
+    }
+
+
+    #region Sort
+
+    async void SortBy(string title, bool? sortedDesc)
+    {
+        SortName = title;
+        SortDesc = (bool)sortedDesc;
+        await FilterApply();
+
+    }
+
+    #endregion
+
+
+    #region Filter
+    private async Task SetRoleFilter(ChangeEventArgs e)
+    {
+        Filter.Role = e.Value.ToString();
+
+        await FilterApply();
+    }
+
+    private async Task SetStatusFilter(ChangeEventArgs e)
+    {
+        var value = e.Value.ToString();
+        if (value == UserStatus.AwaitPay.ToString())
+        {
+            Filter.Status = UserStatus.AwaitPay;
+        }
+        else if (value == UserStatus.Active.ToString())
+        {
+            Filter.Status = UserStatus.Active;
+        }
+        else if (value == UserStatus.Frozen.ToString())
+        {
+            Filter.Status = UserStatus.Frozen;
+        }
+        else if (value == UserStatus.None.ToString())
+        {
+            Filter.Status = UserStatus.None;
+        }
+
+        await FilterApply();
+    }
+
+    private async Task FilterApply()
+    {
+
+
+        UsersRequest = _context.TelegramUsers;
+        IQueryable<TelegramUser> UsersCountRequest = _context.TelegramUsers;
+
+
+        // if (Filter.Role != "All")
+        // {
+
+        //     filteredUsersUI = filteredUsersUI.Where(x => x.Roles == Filter.Role).ToList();
+        // }
+        if (Filter.Status != UserStatus.None)
+        {
+            //UsersRequest = UsersRequest.Where(x => x.Status == Filter.Status);
+            //UsersCountRequest = UsersCountRequest.Where(x => x.Status == Filter.Status);
+
+        }
+
+        UsersCount = await UsersCountRequest.CountAsync();
+        GetPaginationData();
+
+
+        await GetData(SortName, SortDesc);
+
+    }
+
+    private async void CreateUsers()
+    {
+        var users = await _context.Users.ToListAsync();
+        var telegramUsers = await _context.TelegramUsers.ToListAsync();
+        var newTelegramUsers = new List<TelegramUser>();
+
+        foreach (var user in users)
+        {
+            if (!telegramUsers.Where(x => x.TelegramId == user.TelegramId).Any())
+            {
+                newTelegramUsers.Add(new TelegramUser
+                    {
+                        Name = user.Telegram,
+                        TelegramId = user.TelegramId,
+                        Registered = user.Registered,
+                        RegisteredInOneClick = user.Registered
+                    });
+            }
+
+           
+        }
+        if (newTelegramUsers.Count > 0)
+        {
+            await _context.AddRangeAsync(newTelegramUsers);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    private sealed class FilterModel
+    {
+        public string? Name { get; set; } = "";
+        public string? Role { get; set; } = "All";
+        public UserStatus Status { get; set; } = UserStatus.None;
+    }
+
+    #endregion
+
+
+
+
+
+}

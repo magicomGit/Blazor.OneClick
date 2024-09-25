@@ -1,0 +1,253 @@
+﻿@using Blazor.OneClick.Models
+@using Microsoft.EntityFrameworkCore
+@using Telegram.Bot
+@using global::OneClick.Data.Data
+@using global::OneClick.Domain.Enums.Customer
+
+@inject ApplicationDbContext _context
+@inject ITelegramBotClient telegramClient
+
+
+<MudDialog Style="width:100%">
+    <DialogContent>
+        <MudAlert Severity="@((MudBlazor.Severity)Message.Severity)" Variant="Variant.Filled" Class="@(Message.IsVisible ? "d-block my-2" : "d-none")">@Message.Message</MudAlert>
+
+        <MudDataGrid T="UserModel" MultiSelection="true" Items="@Users" QuickFilter="@_quickFilter"
+                     SelectedItemsChanged="@SelectedItemsChanged" Virtualize="true" FixedHeader="true" Height="300px" Dense>
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Пользователи</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn T="UserModel" />
+                <PropertyColumn Property="x => x.Name" Title="Name" />
+                <PropertyColumn Property="x => x.TelegramId" Title="TelegramId" />
+
+
+            </Columns>
+
+        </MudDataGrid>
+
+
+        @*  <MudCheckBox @bind-Value="SendToTelegram" Label="Послать в телеграм" Size="Size.Small"></MudCheckBox> *@
+
+
+
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+            <ActivatorContent>
+                <MudFab Color="Color.Primary"
+                        StartIcon="@Icons.Material.Filled.Image"
+                        Label="Выбрать изображение" />
+            </ActivatorContent>
+        </MudFileUpload>
+
+       @*  <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFiles">
+            <MudButton HtmlTag="label" Class="btn-cust"
+                       Variant="Variant.Outlined" Color="Color.Primary">
+                Выбрать изображение
+            </MudButton>
+        </MudFileUpload> *@
+        <div class="p-3">@File?.Name</div>
+
+
+        <MudTextField T="string" Label="Сообщение" Variant="Variant.Outlined" @bind-Value="TextMessage" Lines="5" />
+
+
+        <MudStack Spacing="2" Class="@(SuccessVisibility +" my-2")">
+            <MudButton OnClick="OnExpandSuccessCollapseClick" Variant="Variant.Outlined" Color="Color.Success">Сообщение отправлено (@SuccessSentList.Count)</MudButton>
+
+            <MudCollapse Expanded="_expandedSuccess">
+                @foreach (var login in SuccessSentList)
+                {
+                    <MudChip T="string" Variant="Variant.Text" Color="Color.Success">@login</MudChip>
+                }
+            </MudCollapse>
+        </MudStack>
+
+
+        <MudStack Spacing="2" Class="@(ErrorVisibility +" my-2")">
+            <MudButton OnClick="OnExpandErrorCollapseClick" Variant="Variant.Outlined" Color="Color.Error">Не удалось отправить сообщение (@ErrorSentList.Count)</MudButton>
+
+            <MudCollapse Expanded="_expandedError">
+                @foreach (var login in ErrorSentList)
+                {
+                    <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@login</MudChip>
+                }
+            </MudCollapse>
+        </MudStack>
+
+
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Отмена</MudButton>
+        @if (SelectedUsers.Count == 0)
+        {
+            <MudButton Disabled Class="btn-cust" Variant="Variant.Filled" OnClick="Submit" Color="Color.Info">Отправить @SelectedUsers.Count</MudButton>
+        }
+        else
+        {
+            <MudButton Class="btn-cust" Variant="Variant.Filled" OnClick="Submit" Color="Color.Info">Отправить @SelectedUsers.Count</MudButton>
+        }
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    //[Parameter] public ApplicationDbContext _context { get; set; }
+
+    private List<UserModel>? Users { get; set; }
+
+
+    private HashSet<UserModel> SelectedUsers = new HashSet<UserModel>();
+
+    private string _searchString;
+
+
+    private string ErrorVisibility = "invisible";
+    private string SuccessVisibility = "invisible";
+    private bool SendToTelegram { get; set; } = true;
+    private List<string> SuccessSentList { get; set; } = new List<string>();
+    private List<string> ErrorSentList { get; set; } = new List<string>();
+    bool _expandedSuccess = false;
+    bool _expandedError = false;
+    string TextMessage { get; set; } = "";
+    private CustomMessage Message = new CustomMessage();
+    IBrowserFile? File;
+    Telegram.Bot.Types.InputFileStream Img = null;
+
+    protected async override void OnParametersSet()
+    {
+        Users = await _context.TelegramUsers.Select(s => new UserModel { Name = s.Name, TelegramId = s.TelegramId }).ToListAsync();
+        StateHasChanged();
+    }
+
+    private async void Submit()
+    {
+        Message = new CustomMessage();
+        if (SendToTelegram)
+        {
+
+            SuccessSentList.Clear();
+            ErrorSentList.Clear();
+
+            if (File == null && TextMessage == "")
+            {
+                Message = new CustomMessage(AppSeverity.Error, "Сообщение не может быть пустым ");
+                return;
+            }
+
+            foreach (var user in SelectedUsers)
+            {
+                try
+                {
+                    if (File != null)
+                    {
+                        try
+                        {
+                            Img = new Telegram.Bot.Types.InputFileStream(File.OpenReadStream());
+                            await telegramClient.SendPhotoAsync(user.TelegramId, Img, caption: TextMessage, parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);// (user.TelegramId, Img, TextMessage);
+                        }
+                        catch (Exception ex)
+                        {
+                            Message = new CustomMessage(AppSeverity.Error, "Ошибка при заргузке изображения " + ex.Message);
+                        }
+                    }
+                    else
+                    {
+                        await telegramClient.SendTextMessageAsync(user.TelegramId, TextMessage);
+                    }
+                    SuccessSentList.Add(user.Name);
+                }
+                catch (Exception ex)
+                {
+                    ErrorSentList.Add(user.Name);
+                }
+
+
+            }
+        }
+
+        if (ErrorSentList.Count > 0)
+        {
+            ErrorVisibility = "";
+        }
+        else
+        {
+            ErrorVisibility = "invisible";
+        }
+
+
+        if (SuccessSentList.Count > 0)
+        {
+            SuccessVisibility = "";
+        }
+        else
+        {
+            SuccessVisibility = "invisible";
+        }
+
+        StateHasChanged();
+    }
+    void Cancel() => MudDialog.Cancel();
+
+
+    void SelectedItemsChanged(HashSet<UserModel> items)
+    {
+        //_events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+        SelectedUsers = items;
+        StateHasChanged();
+    }
+
+
+    private Func<UserModel, bool> _quickFilter => x =>
+       {
+           if (string.IsNullOrWhiteSpace(_searchString))
+               return true;
+
+           if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+               return true;
+
+
+
+
+
+           return false;
+       };
+
+
+
+    private void OnExpandErrorCollapseClick()
+    {
+        _expandedError = !_expandedError;
+    }
+
+    private void OnExpandSuccessCollapseClick()
+    {
+        _expandedSuccess = !_expandedSuccess;
+    }
+
+
+
+    private void UploadFiles(IBrowserFile file)
+    {
+        File = file;
+
+
+
+
+        StateHasChanged();
+
+    }
+    private sealed class UserModel
+    {
+        public string? Name { get; set; }
+
+        public long TelegramId { get; set; }
+
+    }
+}

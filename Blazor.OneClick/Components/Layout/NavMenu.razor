@@ -1,4 +1,5 @@
-﻿@using Blazor.OneClick.Static
+﻿@using Blazor.OneClick.Constants
+@using Blazor.OneClick.Static
 @using Microsoft.Extensions.Localization
 @using MudBlazor
 
@@ -24,6 +25,7 @@
         <MudNavLink Href="domains" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Domain">Доменные зоны</MudNavLink>
         <MudNavLink Href="roles" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.LockPerson">Роли</MudNavLink>
         <MudNavLink Href="users" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.People">Пользователи</MudNavLink>
+        <MudNavLink Href="telegramusers" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.People">Пользователи Telegram</MudNavLink>
         <hr />
         <MudNavLink Href="branding" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.DisplaySettings">Брендирование</MudNavLink>
         <MudNavLink Href="billingsettings" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.AttachMoney">Настройки биллинг</MudNavLink>
@@ -68,7 +70,8 @@
 </MudNavMenu>
 
 @code {
-    private string? currentUrl;
+    // private string? currentUrl;
+    [Parameter] public int NewTransactionCount { get; set; }
 
     protected override void OnInitialized()
     {

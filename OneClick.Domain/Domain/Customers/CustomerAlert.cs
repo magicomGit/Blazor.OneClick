@@ -10,7 +10,7 @@ namespace OneClick.Domain.Domain.Customers
     public class CustomerAlert
     {
         public long Id { get; set; }
-        public Severity Severity { get; set; } = Severity.Error;
+        public AppSeverity Severity { get; set; } = AppSeverity.Error;
         public string Message { get; set; } = string.Empty;
         public string? Issuer { get; set; }
         public string? Link { get; set; }

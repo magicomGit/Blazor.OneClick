@@ -47,7 +47,7 @@ namespace OneClick.Data.Dto
                 LastFreezeReminded = projectPayment.LastFreezeReminded,
                 LastPayment = projectPayment.LastPayment,
                 Message = string.Empty,
-                Severity = Severity.Info,
+                Severity = AppSeverity.Info,
                 
             };
 
