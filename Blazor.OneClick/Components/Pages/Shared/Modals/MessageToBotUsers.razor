@@ -37,18 +37,12 @@
 
         <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
             <ActivatorContent>
-                <MudFab Color="Color.Primary"
-                        StartIcon="@Icons.Material.Filled.Image"
-                        Label="Выбрать изображение" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2"
+                           StartIcon="@Icons.Material.Filled.Image">Выбрать изображение</MudButton>
             </ActivatorContent>
         </MudFileUpload>
 
-       @*  <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFiles">
-            <MudButton HtmlTag="label" Class="btn-cust"
-                       Variant="Variant.Outlined" Color="Color.Primary">
-                Выбрать изображение
-            </MudButton>
-        </MudFileUpload> *@
+      
         <div class="p-3">@File?.Name</div>
 
 
@@ -98,7 +92,7 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    //[Parameter] public ApplicationDbContext _context { get; set; }
+    [Parameter] public List<TelegramUser> TelegramUsers { get; set; }
 
     private List<UserModel>? Users { get; set; }
 
@@ -122,7 +116,7 @@
 
     protected async override void OnParametersSet()
     {
-        Users = await _context.TelegramUsers.Select(s => new UserModel { Name = s.Name, TelegramId = s.TelegramId }).ToListAsync();
+        Users = TelegramUsers.Select(s => new UserModel { Name = s.Name, TelegramId = s.TelegramId }).ToList();
         StateHasChanged();
     }
 
