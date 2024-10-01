@@ -10,7 +10,7 @@
 
 @attribute [Authorize(Roles = Settings.AdminRole)]
 
-
+@inject IJSRuntime JSRuntime;
 @inject ApplicationDbContext _context
 @inject IDialogService _dialogService
 
@@ -88,11 +88,14 @@
             <RowTemplate>
                 <MudTd DataLabel="Telegram">
                     <MudStack Row Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
-                        <MudLink Style="font-weight:bold" Underline="Underline.None" Color="Color.Primary" Href="@("AppProject/"+context.Id)">@context.Name</MudLink>
+                        <MudLink Underline="Underline.None" Color="Color.Primary" OnClick="(()=>TelegramRequest(context.Name))">@context.Name</MudLink>
+                       
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="TelegramId"> @context.TelegramId</MudTd>
-                <MudTd DataLabel="Login"> @context.OneClickLogin</MudTd>
+                <MudTd DataLabel="Login">
+                    <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.OneClickUserId)">@context.OneClickLogin</MudLink>
+                </MudTd>
                 <MudTd DataLabel="Language"> @context.Language</MudTd>
                 <MudTd DataLabel="Created">@_registeredDateFormat(Helper.UtcToLocalTime(context.Registered))</MudTd>
                 <MudTd DataLabel="Created">@_registeredDateFormat(Helper.UtcToLocalTime(context.RegisteredInOneClick))</MudTd>
@@ -105,10 +108,10 @@
             <MudPagination Variant="Variant.Text" ShowFirstButton="true" ShowLastButton="true" Count="PagesQuantity" SelectedChanged="PageChanged" />
         </MudStack>
 
-        <div class="d-flex justify-content-end my-4">
+        <MudStack Row Spacing="3">
             <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" OnClick="SendMessageModal">Рассылка</MudButton>
             <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" OnClick="CreateUsers">Создать пользователей из OneClick</MudButton>
-        </div>
+        </MudStack>
 
     }
 </MudPaper>
@@ -403,10 +406,10 @@
                         Registered = user.Registered,
                         Language = user.Language,
                         OneClickLogin = user.UserName,
+                        OneClickUserId = user.Id,
                         RegisteredInOneClick = user.Registered
                     });
             }
-
 
         }
         if (newTelegramUsers.Count > 0)
@@ -431,5 +434,11 @@
         return date.ToString("d");
     }
 
+
+    private async Task TelegramRequest(string telegram)
+    {
+        var url = "https://t.me/" + telegram;
+        await JSRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
 
 }
