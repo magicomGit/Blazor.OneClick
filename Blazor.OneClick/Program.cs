@@ -9,7 +9,11 @@ using MudBlazor.Services;
 using OneClick.Data.Data;
 using OneClick.Data.Helpers;
 using OneClick.Data.Repositoties;
+using OneClick.Domain.Domain.Balances;
+using OneClick.Services.Balances;
+using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.App;
+using OneClick.UseCases.Intefaces.Balances;
 using OneClick.UseCases.Intefaces.OneClickProjects;
 using OneClick.UseCases.Intefaces.User;
 using Telegram.Bot;
@@ -79,6 +83,8 @@ builder.Services.AddLocalization(options =>
 builder.Services.AddScoped<IOneClickProjectRepositoty, OneClickProjectRepositoty>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+builder.Services.AddScoped<ITransactionRepository<OneClickTransaction>, TransactionRepository>();
+builder.Services.AddScoped<ITransactions<AppResponse>, Transactions>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<AppLogger>();
 

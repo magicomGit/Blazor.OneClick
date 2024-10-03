@@ -1,15 +1,36 @@
 ﻿@page "/referals"
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.Extensions.Localization
 @using MudBlazor
+@using global::OneClick.Data.Data
+@using global::OneClick.Domain.Enums.Transaction
+@using global::OneClick.Services.Contracts
+@using global::OneClick.UseCases.Intefaces.Balances
 @inject IStringLocalizer<Referals> localize
+@inject ITransactions<AppResponse> _transactions
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 
 <PageTitle>Реферальная ссылка | CopyTrader</PageTitle>
 
 
-    <MudPaper  Height="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4"></MudPaper>
+    <MudPaper  Height="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+
+    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" OnClick="CreateUsers">Создать пользователей из OneClick</MudButton>
+
+
+</MudPaper>
 
 
 @code {
     private string Icon = Icons.Material.Filled.ContentCopy;
     private string? referralLink { get; set; } = "";
+
+    async void  CreateUsers()
+    {
+       var  AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUserId = UserManager.GetUserId(AuthState.User);
+
+        var result = await _transactions.ApplyDeposit(new Guid(currentUserId), PaymentSystem.Admin, 9, "test transaction");
+    }
 }

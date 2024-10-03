@@ -136,7 +136,7 @@
             var userName = AuthState.User.Identity.Name;
             if (!_cache.TryGetValue("UserName" + userName, out UserData data))
             {
-                var user = await _userRepository.GetUserByNameAsync(AuthState.User.Identity.Name, true, false, false);
+                var user = await _userRepository.GetByNameAsync(AuthState.User.Identity.Name, true, false, false);
                 if (user == null)
                 {
                     return;
