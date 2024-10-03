@@ -6,5 +6,6 @@
         public double WalletBalance { get; set; }        
         public string? Network { get; set; }
         public string? WalletAddress { get; set; }
+        public double AwaitTransaction { get; set; }
     }
 }

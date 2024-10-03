@@ -6,6 +6,7 @@
 @using global::OneClick.Data.Helpers
 @using global::OneClick.Domain.Enums.Customer
 @using global::OneClick.Domain.Enums.Transaction
+@using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.User
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -13,7 +14,7 @@
 @inject IMemoryCache _cache
 @inject NavigationManager _navigationManager
 @inject ApplicationDbContext _context
-@inject AppLogger _logger
+@inject IAppLogger _logger
 
 
 <style>

@@ -1,6 +1,7 @@
 ﻿using OneClick.Domain.Domain.Balances;
 using OneClick.Domain.Enums.Transaction;
 using OneClick.Services.Contracts;
+using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
 using OneClick.UseCases.Intefaces.User;
 
@@ -10,10 +11,12 @@ namespace OneClick.Services.Balances
     {
         private ITransactionRepository<OneClickTransaction> _transactionRepository;
         private IUserRepository _userRepository;
-        public Transactions(ITransactionRepository<OneClickTransaction> transactionRepository, IUserRepository userRepository)
+        private IAppLogger _logger;
+        public Transactions(ITransactionRepository<OneClickTransaction> transactionRepository, IUserRepository userRepository, IAppLogger logger)
         {
             _transactionRepository = transactionRepository;
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         public async Task<AppResponse> ApplyDeposit(Guid userId, PaymentSystem paymentSystem, double summ, string description)
@@ -39,7 +42,7 @@ namespace OneClick.Services.Balances
                 operations.Add(operation);
 
                 var newTransaction = new OneClickTransaction(id: 0, TransactionCode.Deposit, new Guid(user.Id), paymentSystem, "", user.UserName, summ, DateTime.UtcNow,
-                    description, TransactionType.Deposit, Domain.Enums.Transaction.TransactionStatus.Await, operations);
+                    description, TransactionType.Deposit,TransactionStatus.Await, operations);
 
 
                 var result = await _transactionRepository.Add(newTransaction);
@@ -66,7 +69,7 @@ namespace OneClick.Services.Balances
             return response;
         }
 
-        public async Task<AppResponse> ApproveDeposit(Guid implementerId, long transactionId, double summ, string description)
+        public async Task<AppResponse> ApproveDeposit(Guid implementerId, long transactionId, double summ, string description, string payId)
         {
             var response = new AppResponse { Success = true };
             try
@@ -110,10 +113,10 @@ namespace OneClick.Services.Balances
                 transaction.SetSumm(summ);
 
                 transaction.Operations.Add(new Operation(0, 0, implementerId, implementerName, DateTime.UtcNow, description, 0, OpirationType.Approve, OperationDirection.None,
-                    TransactionCode.ApproveDeposit, transaction.PaySystem, implementerId.ToString()));
+                    TransactionCode.ApproveDeposit, transaction.PaySystem, payId));
                
                  transaction.Operations.Add(new Operation(0, summ, new Guid(user.Id), user.UserName, DateTime.UtcNow, description, user.Balance.WalletBalance + summ, 
-                     OpirationType.Transfer, OperationDirection.Income, TransactionCode.Deposit, transaction.PaySystem, implementerId.ToString()));
+                     OpirationType.Transfer, OperationDirection.Income, TransactionCode.Deposit, transaction.PaySystem, payId));
                
 
                 
@@ -121,18 +124,27 @@ namespace OneClick.Services.Balances
                 //баланс пользователя
                 user.Balance.WalletBalance += summ;
 
-                await _transactionRepository.Update(transaction);
-                _userRepository.
+                var transactionUpdateResult = await _transactionRepository.Update(transaction);
+
+                var userUpdateResult = await _userRepository.UpdateBalanceAsync(user);
+
+                if (transactionUpdateResult && userUpdateResult)
+                {
+                    _logger.LogTransaction($"Платежная система: {transaction.PaySystem} | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} |  Summ: {summ}$ | Пользователь: {user.UserName} | Transaction Id: {transaction.Id}");
+                }
+                else
+                {
+                    _logger.LogCriticalError($"Ошибка при сохранении транзакции | Платежная система: {transaction.PaySystem} | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} |  Summ: {summ}$ | Пользователь: {user.UserName} | Transaction Id: {transaction.Id}");
+                    response.Success = false;
+                }
+
                 
-                _context.Users.Update(user);
-                _context.SaveChanges();
-                response.Message = user.UserName + " / Summ: " + summ + " /  " + TransactionCode.ApproveDeposit.ToString();
                 return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = "ApproveDeposit " + ex.Message;
+                response.Message = $"Transaction Id: {transactionId}  | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} { ex.Message} ";
                 return response;
             }
         }

@@ -86,7 +86,7 @@ builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 builder.Services.AddScoped<ITransactionRepository<OneClickTransaction>, TransactionRepository>();
 builder.Services.AddScoped<ITransactions<AppResponse>, Transactions>();
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<AppLogger>();
+builder.Services.AddScoped<IAppLogger, AppLogger>();
 
 var app = builder.Build();
 

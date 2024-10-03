@@ -1,8 +1,9 @@
 ﻿using OneClick.Data.Data;
+using OneClick.UseCases.Intefaces.App;
 
 namespace OneClick.Data.Helpers
 {
-    public class AppLogger
+    public class AppLogger : IAppLogger
     {
         ApplicationDbContext _context;
         public AppLogger(ApplicationDbContext context)

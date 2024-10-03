@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneClick.Data.Data;
+using OneClick.Data.Dto;
 using OneClick.Domain.Domain.Customers;
 using OneClick.Domain.Enums.Customer;
 using OneClick.UseCases.Intefaces.User;
@@ -173,18 +174,38 @@ namespace OneClick.Data.Repositoties
             return customer;
         }
 
-        public async Task<int> UpdateThemeAsync(string userId, UserTheme theme)
+        public async Task<bool> UpdateThemeAsync(string userId, UserTheme theme)
         {
-            var result = await _context.Users.Where(x => x.Id == userId).ExecuteUpdateAsync(e => e.SetProperty(x => x.Theme, theme));
-            await _context.SaveChangesAsync();
-            return result;
+            await _context.Users.Where(x => x.Id == userId).ExecuteUpdateAsync(e => e.SetProperty(x => x.Theme, theme));
+
+            var result = await _context.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
         }
-        public async Task<int> UpdateAsync(Customer user)
+
+        public async Task<bool> UpdateBalanceAsync(Customer user)
         {
-            _context.Users.Update();
-            var result = await _context.Users.Where(x => x.Id == userId).ExecuteUpdateAsync(e => e.SetProperty(x => x.Theme, theme));
-            await _context.SaveChangesAsync();
-            return result;
+            await _context.Users.Where(x => x.Id == user.Id).ExecuteUpdateAsync(e => e
+            .SetProperty(x => x.Balance, CustomerDto.BalanceDto(user.Balance)));
+
+           var result =  await _context.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
