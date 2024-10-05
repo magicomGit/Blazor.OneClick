@@ -1,6 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
 
 namespace OneClick.Domain.Domain.OneClickProjects
 {
@@ -56,7 +54,7 @@ namespace OneClick.Domain.Domain.OneClickProjects
             OwnerId = ownerId;
             OwnerName = ownerName;
             ProjectDomain = projectDomain;
-            TelegramBot = telegramBot;            
+            TelegramBot = telegramBot;
             ProjectName = projectName;
             ServerIP = serverIP;
             ServerName = serverName;
@@ -87,7 +85,6 @@ namespace OneClick.Domain.Domain.OneClickProjects
 
 
 
-   
 
 
 
@@ -95,7 +92,8 @@ namespace OneClick.Domain.Domain.OneClickProjects
 
 
 
-    
+
+
 
 
 

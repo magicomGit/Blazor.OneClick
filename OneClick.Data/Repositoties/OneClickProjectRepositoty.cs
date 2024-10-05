@@ -91,6 +91,22 @@ namespace OneClick.Data.Repositoties
         {
             throw new NotImplementedException();
         }
+        
+        public async Task<List<CopyTradingProject>> GetByOwnerId(Guid ownerId)
+        {
+            var projects = new List<CopyTradingProject>();
+
+            var projectEntities = await _context.Projects.Where(x=>x.OwnerId == ownerId).ToListAsync();
+
+            if (projectEntities == null)
+            {
+                return projects;
+            }
+
+            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project)));
+
+            return projects;
+        }
 
 
         public async Task<string> GetProjectLogo(int projectId)

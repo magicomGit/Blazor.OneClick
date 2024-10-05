@@ -5,6 +5,7 @@ namespace OneClick.UseCases.Intefaces.OneClickProjects
     public interface  IOneClickProjectRepositoty
     {
         Task<List<CopyTradingProject>> Get();
+        Task<List<CopyTradingProject>> GetByOwnerId(Guid ownerId);
 
         Task<string> GetProjectLogo(int projectId);
 

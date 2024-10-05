@@ -7,6 +7,8 @@
 @using global::OneClick.Domain.Enums.Customer
 @using global::OneClick.Domain.Enums.Transaction
 @using global::OneClick.UseCases.Intefaces.App
+@using global::OneClick.UseCases.Intefaces.Balances
+@using global::OneClick.UseCases.Intefaces.OneClickProjects
 @using global::OneClick.UseCases.Intefaces.User
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -15,6 +17,8 @@
 @inject NavigationManager _navigationManager
 @inject ApplicationDbContext _context
 @inject IAppLogger _logger
+@inject IPayments _payments
+@inject IOneClickProjectRepositoty _projectRepositoty
 
 
 <style>
@@ -42,9 +46,31 @@
                 </div>
 
                 <MudSpacer />
-                <MudIconButton Icon="@_darkModeIcon" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
-                <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Edge="Edge.End" />
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Class=" d-md-none" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
+
+
+               <div class="d-none d-md-block">
+                    <MudStack Spacing="1" Class="" Row AlignItems="AlignItems.Center">
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Info" Href="@("appuser")">
+                            <MudAvatar>
+                                <MudImage Src="@_userData?.Avatar"></MudImage>
+                            </MudAvatar>
+                        </MudLink>
+
+                        <MudLink Href="/appuser?i=1" Color="Color.Surface" Class="text-white px-2 mx-0">
+                            <MudText Typo="Typo.subtitle1" Class="fw-bold">@_userData?.Balance.ToString("N2") $</MudText>
+                        </MudLink>
+
+                        @if (_userData?.FreezeDay != null)
+                        {
+                            <MudChip T="string" Class="fw-bold" Color="_freezeDayColor">до @_userData?.FreezeDay?.ToString("d")</MudChip>
+                        }
+                        <MudIconButton Icon="@_darkModeIcon" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Edge="Edge.End" />
+                    </MudStack>
+               </div>
+                
+               
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="d-md-none" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
 
             </MudAppBar>
 
@@ -60,13 +86,36 @@
                     <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
                 </MudStack>
 
+                <MudStack Justify="Justify.Center" Spacing="0" AlignItems="AlignItems.Center">
+                    <MudLink Class="text-decoration-none fw-bold" Color="Color.Info" Href="@("appuser")">
+                        <MudAvatar Size="Size.Large">
+                            <MudImage Src="@_userData?.Avatar"></MudImage>
+                        </MudAvatar>
+                    </MudLink>                    
+                        @_userData?.UserName                   
+                </MudStack>
+                <MudDivider DividerType="DividerType.Middle" Class="my-2"/>
+
+               <MudStack Row AlignItems="AlignItems.Center">
+                    <MudLink Href="/appuser?i=1" Color="Color.Surface" Class="text-white px-2 mx-0">
+                        <MudText Typo="Typo.subtitle1" Class="fw-bold">@_userData?.Balance.ToString("N2") $</MudText>
+                    </MudLink>
+
+                    @if (_userData?.FreezeDay != null)
+                    {
+                        <MudChip T="string" Class="fw-bold" Color="Color.Surface">до @_userData.FreezeDay?.ToString("d")</MudChip>
+                    }
+               </MudStack>
+               
+                <MudDivider DividerType="DividerType.Middle" Class="my-2" />
+
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
             </MudDrawer>
 
             <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
-                <NavMenu  NewTransactionCount="_newTransactionCount"/>
+                <NavMenu NewTransactionCount="_newTransactionCount" />
             </MudDrawer>
             <MudMainContent Class="content">
                 @Body
@@ -93,7 +142,7 @@
     private string _darkModeIcon = Icons.Material.Outlined.DarkMode;
     private UserData? _userData { get; set; }
     private int _newTransactionCount { get; set; }
-
+    private Color _freezeDayColor { get; set; } = Color.Success;
     private AuthenticationState? AuthState { get; set; }
 
     // protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -133,7 +182,7 @@
         AuthState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         if (AuthState.User.Identity.IsAuthenticated)
         {
-           
+
             var userName = AuthState.User.Identity.Name;
             if (!_cache.TryGetValue("UserName" + userName, out UserData data))
             {
@@ -142,6 +191,10 @@
                 {
                     return;
                 }
+
+                var ownProjects = await _projectRepositoty.GetByOwnerId(new Guid(user.Id));
+                var FreezeDay = await _payments.GetFreezeDay(ownProjects, user.Balance.WalletBalance);
+
                 _userData = new UserData
                     {
                         UserId = user.Id,
@@ -149,7 +202,8 @@
                         Balance = user.Balance.WalletBalance,
                         Language = user.Language,
                         Theme = user.Theme,
-                        UserName = user.UserName
+                        UserName = user.UserName,
+                        FreezeDay = FreezeDay
                     };
 
                 switch (_userData.Theme)
@@ -188,7 +242,7 @@
 
 
 
-          
+
         }
 
     }
@@ -227,7 +281,7 @@
     }
 
 
-     bool CheckSecurity(IMemoryCache cache, HttpContext httpContext, ApplicationDbContext _context)
+    bool CheckSecurity(IMemoryCache cache, HttpContext httpContext, ApplicationDbContext _context)
     {
         int expirationOffset = 1;
         int blockOffset = 60;

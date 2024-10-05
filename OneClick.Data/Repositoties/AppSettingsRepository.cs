@@ -3,11 +3,6 @@ using Newtonsoft.Json;
 using OneClick.Data.Data;
 using OneClick.Domain.Domain.DomainServices;
 using OneClick.UseCases.Intefaces.App;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static OneClick.Domain.Enums.App.AppEnums;
 
 namespace OneClick.Data.Repositoties

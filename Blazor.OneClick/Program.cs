@@ -87,6 +87,7 @@ builder.Services.AddScoped<ITransactionRepository<OneClickTransaction>, Transact
 builder.Services.AddScoped<ITransactions<AppResponse>, Transactions>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAppLogger, AppLogger>();
+builder.Services.AddScoped<IPayments, Payments>();
 
 var app = builder.Build();
 
