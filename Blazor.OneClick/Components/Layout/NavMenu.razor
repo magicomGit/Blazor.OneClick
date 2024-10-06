@@ -26,13 +26,13 @@
         <MudNavLink Href="roles" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.LockPerson">Роли</MudNavLink>
         <MudNavLink Href="users" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.People">Пользователи</MudNavLink>
         <MudNavLink Href="telegramusers" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.People">Пользователи Telegram</MudNavLink>
-        <hr />
+        <MudDivider/>
         <MudNavLink Href="branding" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.DisplaySettings">Брендирование</MudNavLink>
         <MudNavLink Href="billingsettings" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.AttachMoney">Настройки биллинг</MudNavLink>
         <MudNavLink Href="transactions" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Payment">Транзакции </MudNavLink>
         <MudNavLink Href="Invoices" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Feed">Invoices</MudNavLink>
         <MudNavLink Href="CryptomusPayments" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Payments">Cryptomus Payments</MudNavLink>
-        <hr />
+        <MudDivider />
 
     </AuthorizeView>
 
@@ -49,17 +49,17 @@
 
     </AuthorizeView>
     <AuthorizeView Roles="@Settings.AdminRole">
-        <hr />
+        <MudDivider />
         <MudNavLink Href="logs" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.ShortText">Лог</MudNavLink>
     </AuthorizeView>
     <AuthorizeView>
-        <hr />
-        <div class="nav-item px-3 my-1">
+        <MudDivider />
+        <div class=" px-3 my-1">
             <form action="Account/Logout" method="post">
                 <AntiforgeryToken />
                 <input type="hidden" name="ReturnUrl" value="Account/Login" />
-                <button type="submit" class="nav-link mx-3">
-                    <MudIcon Icon="@Icons.Material.Filled.Logout" Title="Favorite" />
+                <button type="submit" class="nav-link ma-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-2" Title="Logout" />
                     @localize["Exit"]
                 </button>
             </form>

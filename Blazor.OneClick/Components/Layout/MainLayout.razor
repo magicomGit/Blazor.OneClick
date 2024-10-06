@@ -48,28 +48,36 @@
                 <MudSpacer />
 
 
-               <div class="d-none d-md-block">
+                <div class="d-none d-md-block">
                     <MudStack Spacing="1" Class="" Row AlignItems="AlignItems.Center">
-                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Info" Href="@("appuser")">
-                            <MudAvatar>
-                                <MudImage Src="@_userData?.Avatar"></MudImage>
-                            </MudAvatar>
-                        </MudLink>
-
-                        <MudLink Href="/appuser?i=1" Color="Color.Surface" Class="text-white px-2 mx-0">
-                            <MudText Typo="Typo.subtitle1" Class="fw-bold">@_userData?.Balance.ToString("N2") $</MudText>
+                        <MudIcon Icon="@Icons.Material.Outlined.AccountBalanceWallet" Color="Color.Inherit" />
+                        <MudLink Href="/appuser?i=1" Underline="Underline.None">
+                            <MudText Typo="Typo.subtitle1" Style="color: white; font-weight:600">@_userData?.Balance.ToString("N2") $</MudText>
                         </MudLink>
 
                         @if (_userData?.FreezeDay != null)
                         {
                             <MudChip T="string" Class="fw-bold" Color="_freezeDayColor">до @_userData?.FreezeDay?.ToString("d")</MudChip>
                         }
-                        <MudIconButton Icon="@_darkModeIcon" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => ThemeToggle())" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Edge="Edge.End" />
                     </MudStack>
-               </div>
-                
-               
+                </div>
+
+                <MudSpacer />
+
+
+                <div class="d-none d-md-block">
+                    <MudStack Spacing="1" Class="" Row AlignItems="AlignItems.Center">
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Info" Href="@("appuser")">
+                            <MudAvatar>
+                                <MudImage Src="@_userData?.Avatar"></MudImage>
+                            </MudAvatar>
+                        </MudLink>
+                        <MudIconButton Icon="@_darkModeIcon" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e)=>ThemeToggle())" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" />
+                    </MudStack>
+                </div>
+
+
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="d-md-none" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
 
             </MudAppBar>
@@ -91,27 +99,34 @@
                         <MudAvatar Size="Size.Large">
                             <MudImage Src="@_userData?.Avatar"></MudImage>
                         </MudAvatar>
-                    </MudLink>                    
-                        @_userData?.UserName                   
-                </MudStack>
-                <MudDivider DividerType="DividerType.Middle" Class="my-2"/>
-
-               <MudStack Row AlignItems="AlignItems.Center">
-                    <MudLink Href="/appuser?i=1" Color="Color.Surface" Class="text-white px-2 mx-0">
-                        <MudText Typo="Typo.subtitle1" Class="fw-bold">@_userData?.Balance.ToString("N2") $</MudText>
                     </MudLink>
+                    @_userData?.UserName
+                </MudStack>
 
-                    @if (_userData?.FreezeDay != null)
-                    {
-                        <MudChip T="string" Class="fw-bold" Color="Color.Surface">до @_userData.FreezeDay?.ToString("d")</MudChip>
-                    }
-               </MudStack>
-               
-                <MudDivider DividerType="DividerType.Middle" Class="my-2" />
 
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Surface">Dashboard</MudNavLink>
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary" IconColor="Color.Surface">Library</MudNavLink>
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Community</MudNavLink>
+                <MudDivider Style="flex-grow: initial;" Class=" my-2" />
+
+
+
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudNavLink Href="/appuser?i=1" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountBalanceWallet" IconColor="Color.Surface">
+                        <MudStack Row>
+                            <MudText  Color="Color.Surface">@_userData?.Balance.ToString("N2") $</MudText>
+                            @if (_userData?.FreezeDay != null)
+                            {
+                                <MudText Style="color:gray; font-size:12px; padding:3px;" >до @_userData.FreezeDay?.ToString("d")</MudText>
+                            }
+
+                        </MudStack>
+                        
+                    </MudNavLink>                   
+                </MudStack>
+
+                <MudNavLink Match="NavLinkMatch.All" Icon="@_darkModeIcon" IconColor="Color.Surface" OnClick="@((e)=>ThemeToggle())">@_userData?.Theme.ToString()</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Language" OnClick="@((e)=>LanguageToggle())" IconColor="Color.Surface">@_userData?.Language</MudNavLink>
+
+                <MudDivider Style="flex-grow: initial;" Class="my-2" />
+                <NavMenu NewTransactionCount="_newTransactionCount" />
             </MudDrawer>
 
             <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
@@ -258,6 +273,11 @@
         _open = !_open;
     }
 
+
+    async void LanguageToggle()
+    {
+        
+    }
 
     async void ThemeToggle()
     {
