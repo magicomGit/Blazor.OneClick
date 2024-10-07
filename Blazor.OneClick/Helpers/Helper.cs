@@ -9,7 +9,23 @@
             return localTime;
         }
 
+        public static string GetLanguageCode(string name)
+        {
+            switch (name)
+            {
+                case "ru-RU":
+                    return "ru";
+                case "en-US":
+                    return "en";
+                case "ru":
+                    return "ru";
+                case "en":
+                    return "en";
+                default:
+                    return "ru";
+            }
 
+        }
         public static string TimeToCountdown(DateTime utcTime)
         {
             var secs = (DateTime.UtcNow - utcTime).TotalSeconds;

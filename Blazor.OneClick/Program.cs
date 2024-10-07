@@ -43,15 +43,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
 
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseLazyLoadingProxies()
-//     .UseSqlServer(Settings.ConnectionString));
 
 
 builder.Services.AddSingleton<ITelegramBotClient, TelegramBotClient>(opt => new TelegramBotClient(Settings.TelegramBotKeyInit)).AddSingleton<TelegramBotEngine>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
@@ -76,7 +72,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 builder.Services.AddLocalization(options =>
 {
     options.ResourcesPath = "Resources";
-
 });
 
 
@@ -104,6 +99,11 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .AddSupportedCultures(new[] { "en-US", "ru-RU" })
+    .AddSupportedUICultures(new[] { "en-US", "ru-RU" })
+    .SetDefaultCulture("ru-RU"));
 
 app.UseStaticFiles();
 app.UseAntiforgery();

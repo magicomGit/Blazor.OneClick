@@ -1,0 +1,111 @@
+﻿@using Blazor.OneClick.Components.Layout
+@using Blazor.OneClick.Constants
+@using Blazor.OneClick.Models
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+
+@inject IStringLocalizer<MainLayout> localize
+
+
+<MudDialog Style="width:100%">
+    <DialogContent>
+        <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-6">
+            <MudText>@localize["SelectedLanguage"]: <strong>@(SelectedDefaultLanguege.Name)</strong></MudText>
+        </MudStack>
+
+        @if (SystemLanguages != null)
+        {
+            <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="my-2">
+                <div class="my-2">
+
+                    @foreach (var language in SystemLanguages)
+                    {
+                        if (SelectedDefaultLanguege.Code == ((LanguageModel)language).Code)
+                        {
+                            <MudChip T="string" Label="true" Variant="Variant.Filled" Size="Size.Small" @onclick="@(()=>ChipChanged(language))" Color="Color.Primary">@(language.Name)</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Label="true" Variant="Variant.Text" Size="Size.Small" @onclick="@(()=>ChipChanged(language))" Color="Color.Primary">@(language.Name)</MudChip>
+                        }
+                    }
+
+                </div>
+            </MudStack>
+
+            <MudDivider Light Class="my-5"></MudDivider>
+            <MudStack Row="true" Justify="Justify.FlexEnd">
+                <MudButton Class="btn-cust my-2" Variant="Variant.Filled" OnClick="Submit" Color="Color.Info">@localize["Apply"]</MudButton>
+            </MudStack>
+        }
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public LanguageModel? SelectedDefaultLanguege { get; set; }
+    public List<LanguageModel> SystemLanguages { get; set; } = new List<LanguageModel>
+    {
+        new LanguageModel
+        {
+            Code= LanguageStaff.Languages[0].code,
+            Name = LanguageStaff.Languages[0].name
+        },
+        new LanguageModel
+        {
+            Code= LanguageStaff.Languages[1].code,
+            Name = LanguageStaff.Languages[1].name
+        }
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (CultureInfo.CurrentCulture.Name == Settings.SupportedCultures[0].Name)
+        {
+            SelectedDefaultLanguege = SystemLanguages[0];
+        }
+        else
+        {
+            SelectedDefaultLanguege = SystemLanguages[1];
+        }
+    }
+
+    private void ChipChanged(LanguageModel language)
+    {
+        SystemLanguages.ForEach(x =>
+        {
+            if (language.Code == x.Code)
+            {
+                x.DefaultLang = true;
+            }
+            else
+            {
+                x.DefaultLang = false;
+            }
+        });
+
+
+
+
+        SelectedDefaultLanguege = language;
+        StateHasChanged();
+    }
+
+    void Submit()
+    {
+        var language = new CultureInfo(SelectedDefaultLanguege.Code);
+        
+        MudDialog.Close(DialogResult.Ok(language.Name));
+    }
+    void Cancel() => MudDialog.Cancel();
+
+    public class LanguageModel
+    {
+        public string? Code { get; set; }
+        public string? Name { get; set; }
+        public bool DefaultLang { get; set; }
+        public bool Selected { get; set; }
+    }
+}

@@ -1,7 +1,13 @@
-﻿@using Blazor.OneClick.Models
+﻿@using Blazor.OneClick.Components.Pages.Shared.Modals
+@using Blazor.OneClick.Constants
+@using Blazor.OneClick.Helpers
+@using Blazor.OneClick.Models
 @using Blazor.OneClick.Static
+@using Microsoft.AspNetCore.Localization
 @using Microsoft.Extensions.Caching.Memory
+@using Microsoft.Extensions.Localization
 @using MudBlazor
+@using System.Globalization
 @using global::OneClick.Data.Data
 @using global::OneClick.Data.Helpers
 @using global::OneClick.Domain.Enums.Customer
@@ -19,7 +25,8 @@
 @inject IAppLogger _logger
 @inject IPayments _payments
 @inject IOneClickProjectRepositoty _projectRepositoty
-
+@inject IDialogService _dialogService
+@inject IStringLocalizer<MainLayout> localize
 
 <style>
     .mud-main-content {
@@ -57,7 +64,7 @@
 
                         @if (_userData?.FreezeDay != null)
                         {
-                            <MudChip T="string" Class="fw-bold" Color="_freezeDayColor">до @_userData?.FreezeDay?.ToString("d")</MudChip>
+                            <MudChip T="string" Class="fw-bold" Color="_freezeDayColor">@localize["until"] @_userData?.FreezeDay?.ToString("d")</MudChip>
                         }
                     </MudStack>
                 </div>
@@ -73,7 +80,7 @@
                             </MudAvatar>
                         </MudLink>
                         <MudIconButton Icon="@_darkModeIcon" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e)=>ThemeToggle())" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" OnClick="LanguageToggle" />
                     </MudStack>
                 </div>
 
@@ -114,7 +121,7 @@
                             <MudText  Color="Color.Surface">@_userData?.Balance.ToString("N2") $</MudText>
                             @if (_userData?.FreezeDay != null)
                             {
-                                <MudText Style="color:gray; font-size:12px; padding:3px;" >до @_userData.FreezeDay?.ToString("d")</MudText>
+                                <MudText Style="color:gray; font-size:12px; padding:3px;">@localize["until"] @_userData.FreezeDay?.ToString("d")</MudText>
                             }
 
                         </MudStack>
@@ -123,7 +130,7 @@
                 </MudStack>
 
                 <MudNavLink Match="NavLinkMatch.All" Icon="@_darkModeIcon" IconColor="Color.Surface" OnClick="@((e)=>ThemeToggle())">@_userData?.Theme.ToString()</MudNavLink>
-                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Language" OnClick="@((e)=>LanguageToggle())" IconColor="Color.Surface">@_userData?.Language</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Language" OnClick="LanguageToggle" IconColor="Color.Surface">@_userData?.Language</MudNavLink>
 
                 <MudDivider Style="flex-grow: initial;" Class="my-2" />
                 <NavMenu NewTransactionCount="_newTransactionCount" />
@@ -255,7 +262,64 @@
                 }
             }
 
+            if (CultureInfo.CurrentCulture.Name != _userData?.Language)
+            {
+                if (_userData != null)
+                {
+                    //UserData_.Language = "ru";
+                    var code = Helper.GetLanguageCode(_userData?.Language);
+                    switch (code)
+                    {
+                        case "ru":
+                            _userData.Language = Settings.SupportedCultures[0].Name;
+                            CultureInfo.CurrentCulture = Settings.SupportedCultures[0];
+                            CultureInfo.CurrentUICulture = Settings.SupportedCultures[0];
+                            break;
+                        case "en":
+                            _userData.Language = Settings.SupportedCultures[1].Name;
+                            CultureInfo.CurrentCulture = Settings.SupportedCultures[1];
+                            CultureInfo.CurrentUICulture = Settings.SupportedCultures[1];
+                            break;
+                        default:
+                            _userData.Language = Settings.SupportedCultures[0].Name;
+                            CultureInfo.CurrentCulture = Settings.SupportedCultures[0];
+                            CultureInfo.CurrentUICulture = Settings.SupportedCultures[0];
+                            break;
+                    }
 
+
+
+                    HttpContext?.Response.Cookies.Append(
+                        CookieRequestCultureProvider.DefaultCookieName,
+                        CookieRequestCultureProvider.MakeCookieValue(
+                            new RequestCulture(
+                                CultureInfo.CurrentCulture,
+                                CultureInfo.CurrentUICulture)));
+
+                    if (AuthState.User.Identity.IsAuthenticated)
+                    {
+                        var AppUser = _context.Users.Where(x => x.UserName == AuthState.User.Identity.Name).FirstOrDefault();
+                        AppUser.Language = CultureInfo.CurrentCulture.Name;
+                        _context.Update(AppUser);
+                        _context.SaveChanges();
+                    }
+                    _navigationManager.Refresh();
+                }
+
+            }
+            //-----------------------------------------------------
+            if (_userData?.FreezeDay != null)
+            {
+
+                if (((DateTime)_userData.FreezeDay - DateTime.UtcNow).TotalDays < 5)
+                {
+                    _freezeDayColor = Color.Warning;
+                }
+                if (((DateTime)_userData.FreezeDay - DateTime.UtcNow).TotalDays < 2)
+                {
+                    _freezeDayColor = Color.Error;
+                }
+            }
 
 
         }
@@ -276,7 +340,23 @@
 
     async void LanguageToggle()
     {
-        
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var parameters = new DialogParameters<LanguageSelectDialog>();
+
+        //var usersForSendMessage = await FilterApply(false);
+
+        //parameters.Add(x => x.TelegramUsers, usersForSendMessage);
+
+        var dialog = await _dialogService.ShowAsync<LanguageSelectDialog>("Мессенджер", parameters, options);
+        var dialogResult = await dialog.Result;
+        if (!dialogResult.Canceled)
+        {
+            var data = (string)dialogResult.Data;
+            _userData.Language = data;
+            _cache.Set("UserName" + _userData.UserName, _userData, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(30)));
+            _navigationManager.Refresh(true);
+        }
     }
 
     async void ThemeToggle()
@@ -357,31 +437,3 @@
 
 
 
-
-
-
-
-
-@*
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
- *@
