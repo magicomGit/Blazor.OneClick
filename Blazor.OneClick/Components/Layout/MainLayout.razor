@@ -43,7 +43,7 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Fixed="false" Elevation="0" Color="Color.Tertiary">
+            <MudAppBar Fixed="false" Elevation="0" >
 
                 <div class="">
                     <MudStack Row>
@@ -90,7 +90,7 @@
             </MudAppBar>
 
 
-            <MudPaper Elevation="1" Height="50px" Class="d-none d-md-block px-4 py-2">
+            <MudPaper Elevation="1" Height="50px" Class="mud-theme-dark d-none d-md-block px-4 py-2">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="pa-1" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
             </MudPaper>
 
@@ -136,7 +136,7 @@
                 <NavMenu NewTransactionCount="_newTransactionCount" />
             </MudDrawer>
 
-            <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Secondary" Elevation="1">
+            <MudDrawer @bind-Open="_drawerOpen" Class="left-menu" ClipMode="DrawerClipMode.Always" Color="Color.Dark" Elevation="1">
                 <NavMenu NewTransactionCount="_newTransactionCount" />
             </MudDrawer>
             <MudMainContent Class="content">

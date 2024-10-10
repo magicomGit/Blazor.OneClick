@@ -10,14 +10,23 @@ namespace Blazor.OneClick.Static
             {
                 Primary = "#372ca1",
                 Secondary = "#888ea8",
-                Tertiary = "#081344"
+                Tertiary = "#fff",
+               Dark = "#9396a5",
+                AppbarBackground = "#0e1726"
+               
             },
             PaletteDark = new PaletteDark()
             {
                 Primary = "#897feb",
                 Secondary = "#242f3d",
-                Tertiary = "#17212b",
+                Tertiary = "#1a1c2d",
+                Background = "#060818",
+                Surface = "#0e1726",
+                Dark = "#060818",
+                AppbarBackground = "#060818",
+                
             },
+           
             //Typography = new Typography()
             //{
                
