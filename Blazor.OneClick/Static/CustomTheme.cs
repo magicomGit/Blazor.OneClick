@@ -10,10 +10,12 @@ namespace Blazor.OneClick.Static
             {
                 Primary = "#372ca1",
                 Secondary = "#888ea8",
-                Tertiary = "#fff",
-               Dark = "#9396a5",
-                AppbarBackground = "#0e1726"
-               
+                Tertiary = "#f1f2f3", //bg block
+               Dark = "#f1f2f3",
+                AppbarBackground = "#0e1726",
+                Background = "#f1f2f3",
+                
+
             },
             PaletteDark = new PaletteDark()
             {
@@ -21,8 +23,8 @@ namespace Blazor.OneClick.Static
                 Secondary = "#242f3d",
                 Tertiary = "#1a1c2d",
                 Background = "#060818",
-                Surface = "#0e1726",
-                Dark = "#060818",
+                Surface = "#0e1726",//cust block
+                Dark = "#060818",//sidebar
                 AppbarBackground = "#060818",
                 
             },
