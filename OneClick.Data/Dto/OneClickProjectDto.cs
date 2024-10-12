@@ -82,12 +82,12 @@ namespace OneClick.Data.Dto
         }
 
 
-        public static CopyTradingProject ProjectDto(Project p)
+        public static CopyTradingProject? ProjectDto(Project p)
         {
             var config = GetProjectConfig(p.ProjectConfig);
             var telegramBotResult = TelegramBot.Create(config.TelegramName, config.TelegramKey);
 
-            TelegramBot telegramBot;
+            //TelegramBot telegramBot;
             if (!telegramBotResult.IsSuccess)
             {
                 return null;

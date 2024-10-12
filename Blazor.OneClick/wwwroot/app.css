@@ -47,9 +47,24 @@ body a {
     padding: 10px;
 }
 
+.mobile-text {
+    color: var(--mud-palette-primary-lighten) !important;
+    
+}
+
+.mud-nav-link {
+    color: var(--mud-palette-primary-lighten) !important;
+    background-color: transparent !important;
+}
+
+.mud-nav-link:hover {
+    color: var(--mud-palette-primary-darken) !important;
+    background-color: transparent !important;
+}
 
 .mud-nav-link.active {
-    color: gainsboro !important;
+    color: var(--mud-palette-primary-darken) !important;
+    background-color: transparent !important;
 }
 /*html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

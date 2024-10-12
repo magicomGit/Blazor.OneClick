@@ -16,7 +16,7 @@
 <MudNavMenu>
 
     <AuthorizeView Roles="@Settings.AdminRole">
-        <MudNavLink Href="" Match="NavLinkMatch.All" IconColor="Color.Surface" Icon="@Icons.Material.Filled.AutoAwesomeMotion">@localize["Projects"]</MudNavLink>
+        <MudNavLink Href="" Match="NavLinkMatch.All" IconColor="Color.Inherit" Icon="@Icons.Material.Filled.AutoAwesomeMotion">@localize["Projects"]</MudNavLink>
         <MudNavLink Href="servers" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Storage">Серверы</MudNavLink>
         <MudNavLink Href="domains" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.Domain">Доменные зоны</MudNavLink>
         <MudNavLink Href="roles" Match="NavLinkMatch.Prefix" IconColor="Color.Surface" Icon="@Icons.Material.Filled.LockPerson">Роли</MudNavLink>
@@ -50,11 +50,11 @@
     </AuthorizeView>
     <AuthorizeView>
         <MudDivider />
-        <div class=" px-3 my-1">
+        <div class=" my-1">
             <form action="Account/Logout" method="post">
                 <AntiforgeryToken />
                 <input type="hidden" name="ReturnUrl" value="Account/Login" />
-                <button type="submit" class="nav-link ma-2">
+                <button type="submit" class="mud-nav-link my-2">
                     <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-2" Title="Logout" />
                     @localize["Exit"]
                 </button>

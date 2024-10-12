@@ -63,7 +63,7 @@
                         </MudAvatar>
                         @if (context.State == ProjectState.Ready)
                         {
-                            <MudLink Style="font-weight:bold" Underline="Underline.None" Color="Color.Primary" Href="@("AppProject/"+context.Id)">@context.ProjectName</MudLink>
+                            <MudLink Style="font-weight:bold" Underline="Underline.None" Color="Color.Primary" Href="@("Projects/"+context.Id)">@context.ProjectName</MudLink>
                         }
                         else
                         {

@@ -11,7 +11,7 @@ namespace OneClick.UseCases.Intefaces.OneClickProjects
 
         Task<string> GetProjectLogoMini(int projectId);
 
-        Task<CopyTradingProject> GetById(int id);
+        Task<CopyTradingProject?> GetById(int id,  bool logoRequired =false, bool miniAvatar = true);
 
         Task<int> Create(CopyTradingProject project);
 

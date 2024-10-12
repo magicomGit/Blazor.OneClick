@@ -1,0 +1,155 @@
+﻿@page "/Projects/{id:int}"
+@using Blazor.OneClick.Components.Pages.Shared.SVG
+@using Blazor.OneClick.Helpers
+@using Microsoft.Extensions.Localization
+@using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.UseCases.Intefaces.App
+@using global::OneClick.UseCases.Intefaces.OneClickProjects
+
+@inject IStringLocalizer<AppProject> localize
+@inject IOneClickProjectRepositoty _projectRepository
+@inject IAppSettingsRepository _settingsRepository
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject IAppLogger _logger;
+
+<PageTitle>@localize["Project"] | CopyTrader</PageTitle>
+
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    @if (_isLoading)
+{
+    <div  style="min-height: 400px">
+        <MudStack Row Wrap="Wrap.Wrap" AlignItems="AlignItems.Center" Class="my-3">
+            <MudSkeleton Class="col-lg-3 d-none d-lg-block" SkeletonType="SkeletonType.Circle" Width="80px" Height="80px" />
+            <MudSkeleton Class="col-lg-9 col-12" Height="80px" />
+        </MudStack>
+        <MudDivider  />
+        <MudSkeleton Height="70px" Class="my-3" />
+        <MudDivider  />
+        <MudStack Row Wrap="Wrap.Wrap" Justify="Justify.SpaceBetween">
+            <MudSkeleton Class="col-md-3 col-12" Height="280px" />
+            <MudSkeleton Class="col-md-3 col-12" Height="280px" />
+            <MudSkeleton Class="col-md-3 col-12" Height="280px" />
+            <MudDivider  />
+        </MudStack>
+        <MudStack Spacing="3" Row Class="my-3">
+            <BinanceLogo />
+            <BitgetLogo />
+            <BybitLogo />
+            <KucoinLogo />
+            <OkxLogo />
+        </MudStack>
+        </div>
+    }
+    else
+    {
+        @if (_project == null)
+        {
+            <h3>@localize["ProjectNotFound"]</h3>
+        }
+        else
+        {
+            <MudStack Row Justify="Justify.SpaceBetween">
+
+           
+            
+                <div class="d-none d-lg-block col-lg-1 ps-2 justify-content-center" style="min-width: 100px">
+                    <img class="p-0" style="width: 80px; height:80px" src="@_project.Logo" />
+                </div>
+
+                <div class="d-flex justify-content-center col-6 col-lg-2 my-2 ps-2">
+                    <div>
+                        <div class="" style="color: lightgray">@localize["Project"]</div>
+                        <div class="fw-bold fs-5">@_project.ProjectName</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center col-6 col-lg-2 my-2 ps-2">
+                    <div>
+                        <div class="" style="color: lightgray">@localize["Tariff"]</div>
+                        @if (_isAdmin)
+                        {
+                            <MudLink Color="Color.Primary" Class="fw-bold fs-5" OnClick="@(ShowTariffDialog)">@localize[_project.Tariff.ToString()]</MudLink>
+                        }
+                        else
+                        {
+                            <div class="fw-bold fs-5">@localize[_project.Tariff.ToString()]</div>
+                        }
+                    </div>
+
+                </div>
+                <div class="d-flex justify-content-center col-6 col-lg-2  my-2 ps-2">
+                    <div>
+                        <div style="color: lightgray">@localize["DailyFee"]</div>
+                        <div class="fs-5">@(_project.DayFee.ToString("N2")) $</div>
+                    </div>
+
+                </div>
+
+
+                @* <div class="col-lg-4 my-2 ps-2  text-end">
+
+                    <div class="d-flex flex-column flex-wrap justify-content-end" Style="">
+
+                        <MudLink Color="Color.Info" Class="fs-5 me-5 pe-1 py-0" Href="@("http://" + _project.ProjectDomain)" Target="_blank">@_project.ProjectDomain</MudLink>
+
+                        @foreach (var zone in AdditionalDamains)
+                        {
+                            <MudStack Spacing="1" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End">
+                                @if (zone.Status == ZoneStatus.Active)
+                                {
+                                    <MudLink Color="Color.Info" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
+                                }
+                                else if (zone.Status == ZoneStatus.Deleted)
+                                {
+                                    <MudText Color="Color.Error" @onclick="@(()=>ShowDomainModal(zone))">@localize["DomainNotFound"]</MudText>
+                                }
+                                else
+                                {
+                                    <MudLink Color="Color.Warning" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
+                                }
+
+                                <MudIconButton OnClick="@(()=>DeleteDomainDialog(zone.Name))" Icon="@Icons.Material.Filled.Close" Style="width: 14px; height:14px" Color="Color.Error" Class="p-0 ms-1 me-5 my-auto"></MudIconButton>
+                            </MudStack>
+
+                        }
+                        <div>
+                            <MudButton Color="Color.Info" Variant="Variant.Text" OnClick="@AddDomainDialog" StartIcon="@Icons.Material.Filled.Add" Class="py-0 px-1 me-5"><MudText>@localize["AddDomain"]</MudText>  </MudButton>
+
+                        </div>
+                    </div>
+                </div> *@
+
+            
+            </MudStack>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery] public int? id { get; set; }
+
+    private bool _isLoading { get; set; } = true;
+    private bool _isAdmin { get; set; } = true;
+
+    private CopyTradingProject? _project { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        _isAdmin = Helper.CheckIsAdmin(authState);
+
+        _project = await _projectRepository.GetById(id ?? 0, true);
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowTariffDialog()
+    {
+        
+    }
+}

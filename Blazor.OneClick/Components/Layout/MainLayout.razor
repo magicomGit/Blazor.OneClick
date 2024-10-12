@@ -90,7 +90,7 @@
             </MudAppBar>
 
 
-            <MudPaper Elevation="1" Height="50px" Class="d-none d-md-block px-4 py-2" Style="@( _dark ? "background:1a1c2d": "background:#fff")">
+            <MudPaper Elevation="1" Class="d-none d-md-block px-4 py-2" Style="@(_dark ? "background:1a1c2d": "background:#fff")">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="pa-1" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
             </MudPaper>
 
@@ -98,7 +98,7 @@
             <MudDrawer @bind-Open="@_open" OverlayAutoClose="true" Class="d-md-none" Height="100%" Color="Color.Tertiary" Variant="@DrawerVariant.Temporary" Anchor="Anchor.Top">
                 <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="px-4">
                     <MudImage Width="30" Height="30" Src="img/logo-200.png"></MudImage>
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"  Edge="Edge.End" OnClick="@((e) => MenuToggle())" />
                 </MudStack>
 
                 <MudStack Justify="Justify.Center" Spacing="0" AlignItems="AlignItems.Center">
@@ -107,7 +107,8 @@
                             <MudImage Src="@_userData?.Avatar"></MudImage>
                         </MudAvatar>
                     </MudLink>
-                    @_userData?.UserName
+                    <MudText Class="mobile-text">@_userData?.UserName</MudText>
+                    
                 </MudStack>
 
 

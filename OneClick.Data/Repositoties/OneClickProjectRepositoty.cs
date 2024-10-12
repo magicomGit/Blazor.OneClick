@@ -87,16 +87,34 @@ namespace OneClick.Data.Repositoties
             return projects;
         }
 
-        public Task<CopyTradingProject> GetById(int id)
+        public async Task<CopyTradingProject?> GetById(int id, bool logoRequired = false, bool miniAvatar = true)
         {
-            throw new NotImplementedException();
+            var projectEntityTask =  _context.Projects.Where(x => x.Id == id).AsNoTracking().Include(x => x.Payment).FirstOrDefaultAsync();
+            var logo  = string.Empty;
+            if (logoRequired) {
+                logo = await GetLogoAsync(id, miniAvatar);
+            }
+
+            var projectEntity = await projectEntityTask;
+
+            if (projectEntity != null)
+            {
+                var project = OneClickProjectDto.ProjectDto(projectEntity);
+                if (project != null) { project.Logo = logo; }
+                
+                return project;
+            }
+            else
+            {
+                return null;
+            }
         }
-        
+
         public async Task<List<CopyTradingProject>> GetByOwnerId(Guid ownerId)
         {
             var projects = new List<CopyTradingProject>();
 
-            var projectEntities = await _context.Projects.Where(x=>x.OwnerId == ownerId).ToListAsync();
+            var projectEntities = await _context.Projects.Where(x => x.OwnerId == ownerId).ToListAsync();
 
             if (projectEntities == null)
             {
@@ -140,6 +158,60 @@ namespace OneClick.Data.Repositoties
         public Task<int> Update(CopyTradingProject project)
         {
             throw new NotImplementedException();
+        }
+
+
+        //============================ private methods =====================
+        public  async Task<string> GetLogoAsync( int projectId, bool miniAvatar = false)
+        {
+            var dataName = ProjectDataNames.Avatar;
+            if (miniAvatar)
+            {
+                dataName = ProjectDataNames.AvatarMini;
+            }
+            else
+            {
+
+            }
+
+
+            var avatar = string.Empty;
+            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == dataName.ToString()).FirstOrDefaultAsync();
+
+            if (dataName == ProjectDataNames.AvatarMini)
+            {
+                if (avatarResult == null || string.IsNullOrEmpty(avatarResult.Value))//если мини лого не загрузился пробуем загрузить большой
+                {
+                    avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.Avatar.ToString()).FirstOrDefaultAsync();
+                    if (avatarResult != null && !string.IsNullOrEmpty(avatarResult.Value))
+                    {
+                        avatar = avatarResult.Value;
+                    }
+                    else
+                    {
+                        avatar = SystemLogo.ContentMini;
+                    }
+                }
+                else
+                {
+                    avatar = avatarResult.Value;
+                }
+            }
+            else
+            {
+                if (avatarResult != null && !string.IsNullOrEmpty(avatarResult.Value))
+                {
+                    avatar = avatarResult.Value;
+                }
+                else
+                {
+                    avatar = SystemLogo.ContentMini;
+                }
+            }
+
+
+
+            return avatar;
         }
     }
 }

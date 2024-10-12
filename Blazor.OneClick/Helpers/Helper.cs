@@ -1,4 +1,7 @@
-﻿namespace Blazor.OneClick.Helpers
+﻿using Blazor.OneClick.Constants;
+using Microsoft.AspNetCore.Components.Authorization;
+
+namespace Blazor.OneClick.Helpers
 {
     public static class Helper
     {
@@ -43,6 +46,20 @@
             {
                 return string.Format("{2:D2}sec ", t.Hours, t.Minutes, t.Seconds);
             }
+        }
+
+        public static bool CheckIsAdmin(AuthenticationState authState)
+        {
+            if (authState == null)
+            {
+                return false;
+            }
+
+            if (authState.User.IsInRole(Settings.AdminRole))
+            {
+                return true;
+            }
+            return false;
         }
 
     }

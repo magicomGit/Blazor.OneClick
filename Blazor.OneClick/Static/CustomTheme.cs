@@ -8,7 +8,9 @@ namespace Blazor.OneClick.Static
         {
             PaletteLight = new PaletteLight()
             {
-                Primary = "#372ca1",
+                Primary = "#4361ee",
+                PrimaryDarken = "#4361ee",
+                PrimaryLighten = "#515365",
                 Secondary = "#888ea8",
                 Tertiary = "#f1f2f3", //bg block
                Dark = "#f1f2f3",
@@ -19,7 +21,9 @@ namespace Blazor.OneClick.Static
             },
             PaletteDark = new PaletteDark()
             {
-                Primary = "#897feb",
+                Primary = "#4682b4",
+                PrimaryDarken = "#4682b4",
+                PrimaryLighten = "#f1f2f3",
                 Secondary = "#242f3d",
                 Tertiary = "#1a1c2d",
                 Background = "#060818",
