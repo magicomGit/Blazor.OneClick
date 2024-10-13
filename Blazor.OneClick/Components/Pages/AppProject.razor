@@ -1,4 +1,5 @@
 ﻿@page "/Projects/{id:int}"
+@using Blazor.OneClick.Components.Pages.Shared.AppProject
 @using Blazor.OneClick.Components.Pages.Shared.SVG
 @using Blazor.OneClick.Helpers
 @using CloudFlare.Client.Enumerators
@@ -8,7 +9,7 @@
 @using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
-@inject IStringLocalizer<AppProject> localize
+@inject IStringLocalizer<Projects> localize
 @inject IOneClickProjectRepositoty _projectRepository
 @inject IAppSettingsRepository _settingsRepository
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -50,98 +51,44 @@
         }
         else
         {
-            <MudStack Row Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.SpaceBetween">
-
-                <MudStack Row>
-                    <div class="d-none d-lg-block ps-2" style="min-width: 100px">
-                        <img class="p-0" style="width: 80px; height:80px" src="@_project.Logo" />
-                    </div>
-
-                    <div>
-                        <MudText Class="secondary-light">@localize["Project"]</MudText>
-                        <MudText Typo="Typo.h5">@_project.ProjectName</MudText>
-                    </div>
-                </MudStack>
-
+            <ProjectHead isAdmin=_isAdmin localize="localize" project="_project" />
+            <MudStack Row Justify="Justify.SpaceBetween" Class="mt-5">
                 <div>
-
-                    <MudText Class="secondary-light">@localize["Tariff"]</MudText>
-                    @if (_isAdmin)
-                    {
-                        <MudLink Color="Color.Primary" Typo="Typo.h5" OnClick="@(ShowTariffDialog)">@localize[_project.Tariff.ToString()]</MudLink>
-                    }
-                    else
-                    {
-                        <MudText Typo="Typo.h5">@localize[_project.Tariff.ToString()]</MudText>
-                    }
-
-
-                </div>
-
-                <div>
-                    <MudText Class="secondary-light">@localize["DailyFee"]</MudText>
-                    <MudText Typo="Typo.h5">@(_project.DayFee.ToString("N2")) $</MudText>
-                </div>
-
-
-                <MudStack Wrap="Wrap.Wrap" Spacing="0" Class="mt-3 mt-md-0">
-                    <MudLink Color="Color.Primary" Class="" Typo="Typo.h5" Href="@("http://" + _project.ProjectDomain)" Target="_blank">@_project.ProjectDomain</MudLink>
-
-                    @foreach (var zone in AdditionalDamains)
-                    {
-                        <MudStack Spacing="1" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End">
-                            @if (zone.Status == ZoneStatus.Active)
-                            {
-                                <MudLink Color="Color.Info" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
-                            }
-                            else if (zone.Status == ZoneStatus.Deleted)
-                            {
-                                <MudText Color="Color.Error" @onclick="@(()=>ShowDomainModal(zone))">@localize["DomainNotFound"]</MudText>
-                            }
-                            else
-                            {
-                                <MudLink Color="Color.Warning" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
-                            }
-
-                            <MudIconButton OnClick="@(()=>DeleteDomainDialog(zone.Name))" Icon="@Icons.Material.Filled.Close" Style="width: 14px; height:14px" Color="Color.Error" Class="p-0 ms-1 me-5 my-auto"></MudIconButton>
-                        </MudStack>
-
-                    }
-                    <MudStack Spacing="1" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End">
-                        <MudIconButton OnClick="@AddDomainDialog" Icon="@Icons.Material.Filled.Add" Style="width: 14px; height:14px" Color="Color.Primary" Class=" my-auto"></MudIconButton>
-                        <MudLink Color="Color.Primary" OnClick="@AddDomainDialog">@localize["AddDomain"]</MudLink>
+                    <MudText Typo="Typo.h5" Class="mb-3">@localize["Users"]</MudText>
+                    <MudStack Row Wrap="Wrap.Wrap">
+                        <div class="ma-2">
+                            <MudText Typo="Typo.h5" Inline Class="secondary-light">@localize["TraderCount"]: </MudText>
+                            <MudText Typo="Typo.h5" Inline Style=" font-weight: bold">@_project.TraderCount</MudText>
+                        </div>
+                        <div class="ma-2">
+                            <MudText Typo="Typo.h5" Inline Class="secondary-light">@localize["InvestorsCount"]: </MudText>
+                            <MudText Typo="Typo.h5" Inline Style=" font-weight: bold">@_project.UserCount</MudText>
+                        </div>
                     </MudStack>
 
-                </MudStack>
-
-            </MudStack>
-
-            <MudStack Row Wrap="Wrap.Wrap" Justify="Justify.SpaceBetween" Class="my-3 rounded-lg  bg-dark pa-4 mud-elevation-2">
-                <div>
-                    <MudText Inline Class="secondary-light">@localize["Status"]: </MudText>
-                    <MudText Inline Color="Color.Success" Style=" font-weight: bold">@localize[_project.State.ToString()]</MudText>
                 </div>
 
                 <div>
-                    <MudText Inline Class="secondary-light">@localize["Ping"]: </MudText>
-                    <MudText Inline Color="Color.Error" Style=" font-weight: bold">@Helper.TimeToCountdown(_project.LastPing)</MudText>
-                </div>
+                    <MudText Typo="Typo.h5" Class="mb-3">@localize["Exchanges"]</MudText>
+                    <MudStack Row="false" Wrap="Wrap.Wrap">
+                        @foreach (ExchangeMarket exchange in Enum.GetValues(typeof(ExchangeMarket)))
+                        {
+                             
+                            if (exchange == ExchangeMarket.None)
+                            {
+                                continue;
+                            }
 
-                <div class="d-none d-md-block">
+                            <MudCheckBox T="bool" Value="@(_project.Exchanges.Contains(exchange))" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
+                        }
 
-                    <MudText Inline Class="secondary-light">@localize["MaxTraders"]: </MudText>
-                    <MudText Inline>@(_project.TraderMaxCount)</MudText>
+                    </MudStack>
 
-                </div>
-                <div class="d-none d-md-block">
-                    
-                        <MudText Inline Class="secondary-light">@localize["MaxInvestors"]: </MudText>
-                    <MudText Inline>@(_project.UserMaxCount)</MudText>
-                    
                 </div>
 
             </MudStack>
-           
+
+
         }
     }
 </MudPaper>
@@ -157,7 +104,6 @@
     private string _projectPingColor = "Red";
 
     private CopyTradingProject? _project { get; set; }
-    private List<ProjectDomain>? AdditionalDamains { get; set; } = new List<ProjectDomain>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

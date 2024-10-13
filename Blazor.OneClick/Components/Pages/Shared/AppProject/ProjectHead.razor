@@ -1,0 +1,128 @@
+﻿@using Blazor.OneClick.Helpers
+@using CloudFlare.Client.Enumerators
+@using Microsoft.Extensions.Localization
+@using global::OneClick.Data.Data
+@using global::OneClick.Domain.Domain.OneClickProjects
+
+<MudStack Row Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.SpaceBetween">
+
+    <MudStack Row>
+        <div class="d-none d-lg-block ps-2" style="min-width: 100px">
+            <img class="p-0" style="width: 80px; height:80px" src="@project.Logo" />
+        </div>
+
+        <div>
+            <MudText Class="secondary-light">@localize["Project"]</MudText>
+            <MudText Typo="Typo.h5">@project.ProjectName</MudText>
+        </div>
+    </MudStack>
+
+    <div>
+
+        <MudText Class="secondary-light">@localize["Tariff"]</MudText>
+        @if (isAdmin)
+        {
+            <MudLink Color="Color.Primary" Typo="Typo.h5" OnClick="@(ShowTariffDialog)">@localize[project.Tariff.ToString()]</MudLink>
+        }
+        else
+        {
+            <MudText Typo="Typo.h5">@localize[project.Tariff.ToString()]</MudText>
+        }
+
+
+    </div>
+
+    <div>
+        <MudText Class="secondary-light">@localize["DailyFee"]</MudText>
+        <MudText Typo="Typo.h5">@(project.DayFee.ToString("N2")) $</MudText>
+    </div>
+
+
+    <MudStack Wrap="Wrap.Wrap" Spacing="0" Class="mt-3 mt-md-0">
+        <MudLink Color="Color.Primary" Class="" Typo="Typo.h5" Href="@("http://" + project.ProjectDomain)" Target="_blank">@project.ProjectDomain</MudLink>
+
+        @foreach (var zone in additionalDamains)
+        {
+            <MudStack Spacing="1" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End">
+                @if (zone.Status == ZoneStatus.Active)
+                {
+                    <MudLink Color="Color.Info" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
+                }
+                else if (zone.Status == ZoneStatus.Deleted)
+                {
+                    <MudText Color="Color.Error" @onclick="@(()=>ShowDomainModal(zone))">@localize["DomainNotFound"]</MudText>
+                }
+                else
+                {
+                    <MudLink Color="Color.Warning" OnClick="@(()=>ShowDomainModal(zone))">@zone.Name</MudLink>
+                }
+
+                <MudIconButton OnClick="@(()=>DeleteDomainDialog(zone.Name))" Icon="@Icons.Material.Filled.Close" Style="width: 14px; height:14px" Color="Color.Error" Class="p-0 ms-1 me-5 my-auto"></MudIconButton>
+            </MudStack>
+
+        }
+        <MudStack Spacing="1" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End">
+            <MudIconButton OnClick="@AddDomainDialog" Icon="@Icons.Material.Filled.Add" Style="width: 14px; height:14px" Color="Color.Primary" Class=" my-auto"></MudIconButton>
+            <MudLink Color="Color.Primary" OnClick="@AddDomainDialog">@localize["AddDomain"]</MudLink>
+        </MudStack>
+
+    </MudStack>
+
+
+
+</MudStack>
+
+<MudStack Row Wrap="Wrap.Wrap" Justify="Justify.SpaceBetween" Class="my-3 rounded-lg  bg-dark pa-4 mud-elevation-2">
+    <div>
+        <MudText Inline Class="secondary-light">@localize["Status"]: </MudText>
+        <MudText Inline Color="Color.Success" Style=" font-weight: bold">@localize[project.State.ToString()]</MudText>
+    </div>
+
+    <div>
+        <MudText Inline Class="secondary-light">@localize["Ping"]: </MudText>
+        <MudText Inline Color="Color.Error" Style=" font-weight: bold">@Helper.TimeToCountdown(project.LastPing)</MudText>
+    </div>
+
+    <div class="d-none d-md-block">
+
+        <MudText Inline Class="secondary-light">@localize["MaxTraders"]: </MudText>
+        <MudText Inline>@(project.TraderMaxCount)</MudText>
+
+    </div>
+    <div class="d-none d-md-block">
+
+        <MudText Inline Class="secondary-light">@localize["MaxInvestors"]: </MudText>
+        <MudText Inline>@(project.UserMaxCount)</MudText>
+
+    </div>
+
+</MudStack>
+
+@code {
+    [Parameter] public CopyTradingProject project { get; set; }
+    [Parameter] public IStringLocalizer<Projects> localize { get; set; }
+    [Parameter] public bool isAdmin { get; set; }
+    [Parameter] public List<ProjectDomain> additionalDamains { get; set; } = new List<ProjectDomain>();
+    //[Parameter] public Action<int> LoadData { get; set; }
+
+
+    private void AddDomainDialog()
+    {
+
+    }
+
+    private void ShowTariffDialog()
+    {
+
+    }
+
+    private void ShowDomainModal(ProjectDomain zone)
+    {
+
+    }
+
+    private void DeleteDomainDialog(string zone)
+    {
+
+    }
+}
