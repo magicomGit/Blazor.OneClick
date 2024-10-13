@@ -88,20 +88,18 @@ namespace OneClick.Data.Repositoties
         }
 
         public async Task<CopyTradingProject?> GetById(int id, bool logoRequired = false, bool miniAvatar = true)
-        {
-            var projectEntityTask =  _context.Projects.Where(x => x.Id == id).AsNoTracking().Include(x => x.Payment).FirstOrDefaultAsync();
-            var logo  = string.Empty;
-            if (logoRequired) {
-                logo = await GetLogoAsync(id, miniAvatar);
-            }
-
-            var projectEntity = await projectEntityTask;
+        {            
+            var projectEntity = await _context.Projects.Where(x => x.Id == id).AsNoTracking().Include(x => x.Payment).FirstOrDefaultAsync(); ;
 
             if (projectEntity != null)
             {
                 var project = OneClickProjectDto.ProjectDto(projectEntity);
-                if (project != null) { project.Logo = logo; }
-                
+                if (project != null && logoRequired)
+                {
+                    var logo = await GetLogoAsync(id, miniAvatar);
+                    project.Logo = logo;
+                }
+
                 return project;
             }
             else
@@ -129,7 +127,8 @@ namespace OneClick.Data.Repositoties
 
         public async Task<string> GetProjectLogo(int projectId)
         {
-            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.Avatar.ToString()).FirstOrDefaultAsync();
+            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.Avatar.ToString())
+                .AsNoTracking().FirstOrDefaultAsync();
 
             if (avatarResult == null || string.IsNullOrEmpty(avatarResult.Value))
             {
@@ -143,7 +142,8 @@ namespace OneClick.Data.Repositoties
 
         public async Task<string> GetProjectLogoMini(int projectId)
         {
-            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.AvatarMini.ToString()).FirstOrDefaultAsync();
+            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.AvatarMini.ToString())
+                .AsNoTracking().FirstOrDefaultAsync();
 
             if (avatarResult == null || string.IsNullOrEmpty(avatarResult.Value))
             {
@@ -162,27 +162,26 @@ namespace OneClick.Data.Repositoties
 
 
         //============================ private methods =====================
-        public  async Task<string> GetLogoAsync( int projectId, bool miniAvatar = false)
+        public async Task<string> GetLogoAsync(int projectId, bool miniAvatar = false)
         {
-            var dataName = ProjectDataNames.Avatar;
+            var dataName = ProjectDataNames.Avatar.ToString();
             if (miniAvatar)
             {
-                dataName = ProjectDataNames.AvatarMini;
+                dataName = ProjectDataNames.AvatarMini.ToString();
             }
-            else
-            {
 
-            }
 
 
             var avatar = string.Empty;
-            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == dataName.ToString()).FirstOrDefaultAsync();
+            var avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == dataName)
+                .AsNoTracking().FirstOrDefaultAsync();
 
-            if (dataName == ProjectDataNames.AvatarMini)
+            if (dataName == ProjectDataNames.AvatarMini.ToString())
             {
                 if (avatarResult == null || string.IsNullOrEmpty(avatarResult.Value))//если мини лого не загрузился пробуем загрузить большой
                 {
-                    avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.Avatar.ToString()).FirstOrDefaultAsync();
+                    avatarResult = await _context.ProjectsData.Where(x => x.ProjectId == projectId && x.Name == ProjectDataNames.Avatar.ToString())
+                        .AsNoTracking().FirstOrDefaultAsync();
                     if (avatarResult != null && !string.IsNullOrEmpty(avatarResult.Value))
                     {
                         avatar = avatarResult.Value;

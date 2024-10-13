@@ -39,6 +39,13 @@ body a {
 }
 
 
+.bg-dark {
+    background-color: var(--mud-palette-dark) !important;
+}
+
+.secondary-light {
+    color: var(--mud-palette-secondary-lighten) !important;
+}
 
 .cust-block {
     /*border: solid 1px #d2d2d2;*/
