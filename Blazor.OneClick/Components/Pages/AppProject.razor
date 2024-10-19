@@ -11,14 +11,14 @@
 @using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
-@inject IStringLocalizer<Projects> localize
+@inject IStringLocalizer<Projects> _localize
 @inject IOneClickProjectRepositoty _projectRepository
 @inject IAppSettingsRepository _settingsRepository
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject IAppLogger _logger;
 @inject IDialogService _dialogService
 
-<PageTitle>@localize["Project"] | CopyTrader</PageTitle>
+<PageTitle>@_localize["Project"] | CopyTrader</PageTitle>
 
 <MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
     @if (_isLoading)
@@ -50,22 +50,22 @@
     {
         @if (_project == null)
         {
-            <h3>@localize["ProjectNotFound"]</h3>
+            <h3>@_localize["ProjectNotFound"]</h3>
         }
         else
         {
-            <ProjectHead isAdmin=_isAdmin localize="localize" project="_project" />
+            <ProjectHead isAdmin=_isAdmin localize="_localize" project="_project" />
             <MudStack Row Justify="Justify.SpaceBetween" StretchItems="StretchItems.All" Wrap="Wrap.Wrap" Spacing="9" Class="my-7">
                 @* Users *@
                 <div>
-                    <MudText Typo="Typo.h5" Class="mb-3">@localize["Users"]</MudText>
+                    <MudText Typo="Typo.h5" Class="mb-3">@_localize["Users"]</MudText>
                     <MudStack Row="false" Spacing="1">
                         <div class="mx-2">
-                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@localize["TraderCount"]: </MudText>
+                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@_localize["TraderCount"]: </MudText>
                             <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_project.TraderCount</MudText>
                         </div>
                         <div class="mx-2">
-                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@localize["InvestorsCount"]: </MudText>
+                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@_localize["InvestorsCount"]: </MudText>
                             <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_project.UserCount</MudText>
                         </div>
                     </MudStack>
@@ -74,9 +74,9 @@
                 @* Exchanges *@
                 <div>
                     <MudStack Row Spacing="2">
-                        <MudText Typo="Typo.h5" Class="mb-3">@localize["Exchanges"]</MudText>
+                        <MudText Typo="Typo.h5" Class="mb-3">@_localize["Exchanges"]</MudText>
                         <div class="mt-2">
-                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@localize["ExchangesTitle"]">
+                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@_localize["ExchangesTitle"]">
                                 <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.HelpOutline" Style="width:20px; height:20px; margin-bottom: 5px;"></MudIcon>
                             </MudTooltip>
                         </div>
@@ -103,20 +103,20 @@
                 <div>
 
                     <MudStack Row Spacing="2">
-                        <MudText Typo="Typo.h5" Class="mb-3">@localize["OtherSettings"]</MudText>
+                        <MudText Typo="Typo.h5" Class="mb-3">@_localize["OtherSettings"]</MudText>
                         <div class="mt-2">
-                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@localize["OtherSettingsTitle"]">
+                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@_localize["OtherSettingsTitle"]">
                                 <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.HelpOutline" Style="width:20px; height:20px; margin-bottom: 5px;"></MudIcon>
                             </MudTooltip>
                         </div>
                     </MudStack>
-                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.BillingEnabled" Label="@localize["Billing"]" Size="Size.Small"></MudCheckBox>
-                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.CrossTradingEnabled" Label="@localize["CrossTrading"]" Size="Size.Small"></MudCheckBox>
+                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.BillingEnabled" Label="@_localize["Billing"]" Size="Size.Small"></MudCheckBox>
+                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.CrossTradingEnabled" Label="@_localize["CrossTrading"]" Size="Size.Small"></MudCheckBox>
                     <hr />
-                    <MudText>@localize["DefaultLanguage"]: <strong>@(" " + SelectedDefaultLanguege?.Name)</strong></MudText>
+                    <MudText>@_localize["DefaultLanguage"]: <strong>@(" " + SelectedDefaultLanguege?.Name)</strong></MudText>
                     <MudStack Row="true" AlignItems="AlignItems.Center" Class="my-2">
-                        <MudText>@localize["SelectedLanguages"]: (@SelectedLanguages?.Where(x => x.Selected).Count())</MudText>
-                        <MudButton OnClick="(AddLanduageDialog)" Color="Color.Primary" Class="py-0"><MudText>@localize["AddLanguage"]</MudText> </MudButton>
+                        <MudText>@_localize["SelectedLanguages"]: (@SelectedLanguages?.Where(x => x.Selected).Count())</MudText>
+                        <MudButton OnClick="(AddLanduageDialog)" Color="Color.Primary" Class="py-0"><MudText>@_localize["AddLanguage"]</MudText> </MudButton>
                     </MudStack>
 
 
@@ -127,9 +127,9 @@
             <MudDivider />
 
             <MudStack Row Justify="Justify.FlexEnd" Class="my-4">
-                <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" OnClick="RelocateDialog">@localize["RelocateProject"]</MudButton>
+                <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" OnClick="RelocateDialog">@_localize["RelocateProject"]</MudButton>
 
-                <MudButton OnClick="CreateProject" Class="" Color="Color.Primary" Variant="Variant.Filled">@localize["SaveChanges"]</MudButton>
+                <MudButton OnClick="SaveChanges" Class="" Color="Color.Primary" Variant="Variant.Filled">@_localize["SaveChanges"]</MudButton>
             </MudStack>
 
 
@@ -234,7 +234,7 @@
         parameters.Add(x => x.SelectedLanguages, SelectedLanguages);
         parameters.Add(x => x.SelectedDefaultLanguege, SelectedDefaultLanguege);
 
-        var dialog = await _dialogService.ShowAsync<LenguageSelectModal>(@localize["LanguagesCopyTrading"], parameters, options);
+        var dialog = await _dialogService.ShowAsync<LenguageSelectModal>(@_localize["LanguagesCopyTrading"], parameters, options);
         var result = await dialog.Result;
         if (result.Canceled)
         {
@@ -264,12 +264,13 @@
 
     }
 
-    private void CreateProject()
+   
+    private void RelocateDialog()
     {
 
     }
-
-    private void RelocateDialog()
+   
+    private void SaveChanges()
     {
 
     }

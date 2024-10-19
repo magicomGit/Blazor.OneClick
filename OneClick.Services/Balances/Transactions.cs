@@ -7,7 +7,7 @@ using OneClick.UseCases.Intefaces.User;
 
 namespace OneClick.Services.Balances
 {
-    public class Transactions : ITransactions<AppResponse>
+    public class Transactions : ITransactions<Response<OneClickTransaction>, OneClickTransaction>
     {
         private ITransactionRepository<OneClickTransaction> _transactionRepository;
         private IUserRepository _userRepository;
@@ -19,9 +19,9 @@ namespace OneClick.Services.Balances
             _logger = logger;
         }
 
-        public async Task<AppResponse> ApplyDeposit(Guid userId, PaymentSystem paymentSystem, double summ, string description)
+        public async Task<Response<OneClickTransaction>> ApplyDeposit(Guid userId, PaymentSystem paymentSystem, double summ, string description)
         {
-            var response = new AppResponse { Success = true };
+            var response = new Response<OneClickTransaction> { Success = true };
             try
             {
                 var user = await _userRepository.GetByIdAsync(userId.ToString());
@@ -69,9 +69,9 @@ namespace OneClick.Services.Balances
             return response;
         }
 
-        public async Task<AppResponse> ApproveDeposit(Guid implementerId, long transactionId, double summ, string description, string payId)
+        public async Task<Response<OneClickTransaction>> ApproveDeposit(Guid implementerId, long transactionId, double summ, string description, string payId)
         {
-            var response = new AppResponse { Success = true };
+            var response = new Response<OneClickTransaction> { Success = true };
             try
             {
                 var transaction = await _transactionRepository.GetById(transactionId);

@@ -237,4 +237,22 @@
   <data name="Freeze" xml:space="preserve">
     <value>Freeze</value>
   </data>
+  <data name="ProjectFreezeDescription" xml:space="preserve">
+    <value>Freezing the project will stop copying for all traders. The positions of traders and investors will remain unchanged.</value>
+  </data>
+  <data name="ForciblyFreeze" xml:space="preserve">
+    <value>Forcibly Freeze</value>
+  </data>
+  <data name="DeleteProjectDescription" xml:space="preserve">
+    <value>Deleting a project will result in the loss of all data without the ability to restore it.</value>
+  </data>
+  <data name="DeleteProject" xml:space="preserve">
+    <value>Delete Project</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteProjectDescriptionModal" xml:space="preserve">
+    <value>Deleting a project will result in the loss of all data without the ability to restore it.To confirm the deletion, enter the name of the project.</value>
+  </data>
 </root>

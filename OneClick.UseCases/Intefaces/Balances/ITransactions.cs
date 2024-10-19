@@ -2,7 +2,7 @@
 
 namespace OneClick.UseCases.Intefaces.Balances
 {
-    public interface ITransactions<TResponse>
+    public interface ITransactions<TResponse, TTransaction>
     {
         Task<TResponse> ApplyDeposit(Guid userId, PaymentSystem paymentSystem, double summ, string description);
         Task<TResponse> ApproveDeposit(Guid implementerId, long transactionId, double summ, string description, string payId);

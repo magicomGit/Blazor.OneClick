@@ -237,4 +237,22 @@
   <data name="Freeze" xml:space="preserve">
     <value>Заморозить</value>
   </data>
+  <data name="ProjectFreezeDescription" xml:space="preserve">
+    <value>Замораживание проекта приведет к остановке копирования для всех трейдеров. Позиции трейдеров и инвесторов остануться без изменений.</value>
+  </data>
+  <data name="ForciblyFreeze" xml:space="preserve">
+    <value>Принудительно заморозить</value>
+  </data>
+  <data name="DeleteProjectDescription" xml:space="preserve">
+    <value>Удаление проекта приведет к потере всех данных без возможности их восстановить.</value>
+  </data>
+  <data name="DeleteProject" xml:space="preserve">
+    <value>Удаление проекта</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="DeleteProjectDescriptionModal" xml:space="preserve">
+    <value>Удаление проекта приведет к потере всех данных без возможности их восстановить. Чтобы подтвердить удаление, введите название проекта.</value>
+  </data>
 </root>
