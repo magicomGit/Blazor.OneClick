@@ -1,0 +1,118 @@
+﻿@using Blazor.OneClick.Models
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Projects> localize
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="my-2">
+            <MudText>@localize["DefaultLanguage"]: <strong>@(SelectedDefaultLanguege.Name)</strong></MudText>
+        </MudStack>
+        @if (SelectedLanguages != null)
+        {
+            var isDefaultLanguageExist = true;
+            @if (!SelectedLanguages.Where(x => x.Code == SelectedDefaultLanguege.Code && x.Selected).Any())
+            {
+                isDefaultLanguageExist = false;
+
+            }
+            foreach (var language in SelectedLanguages)
+            {
+                if (language.Selected)
+                {
+                    @if (!isDefaultLanguageExist && language.Code == "ru")
+                    {
+                        <MudChip Label="true" T="LanguageModel" Variant="Variant.Filled" @onclick="@(()=>ChipChanged(language))" Size="Size.Small" Color="Color.Primary">Русский</MudChip>
+                        SelectedDefaultLanguege = language;
+                        continue;
+                    }
+                    if (SelectedDefaultLanguege.Code == ((LanguageModel)language).Code)
+                    {
+                        <MudChip Label="true" T="LanguageModel" Variant="Variant.Filled" Size="Size.Small" @onclick="@(()=>ChipChanged(language))" Color="Color.Primary">@(language.Name)</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip Label="true" T="LanguageModel" Variant="Variant.Text" Size="Size.Small" @onclick="@(()=>ChipChanged(language))" Color="Color.Primary">@(language.Name)</MudChip>
+                    }
+                }
+
+            }
+        }
+
+        <hr />
+
+        <MudText>@localize["SelectedLanguageCopySystem"]: (@SelectedLanguages?.Where(x => x.Selected).Count())</MudText>
+
+
+        <MudCollapse Expanded="true">
+           
+
+
+            @foreach (var language in SelectedLanguages)
+            {
+                if (language.Selected || language.Code == "ru" || language.Code == "en")
+                {
+                    <MudChip Label="true" OnClick="(()=>AddLenguage(language.Code))" Size="Size.Small" Value="@language" Variant="Variant.Filled" Color="Color.Primary">@language.Name</MudChip>
+                }
+                else
+                {
+                    <MudChip Label="true" OnClick="(()=>AddLenguage(language.Code))" Size="Size.Small" Value="@language" Variant="Variant.Text" Color="Color.Primary">@language.Name</MudChip>
+                }
+            }
+
+        </MudCollapse>
+
+    </DialogContent>
+    <DialogActions>
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    bool _expandedSelectedLanguages { get; set; }
+
+    [Parameter] public List<LanguageModel>? SelectedLanguages { get; set; }
+    [Parameter] public LanguageModel SelectedDefaultLanguege { get; set; }
+
+
+    private void ChipChanged(LanguageModel language)
+    {
+        SelectedLanguages.ForEach(x =>
+        {
+            if (language.Code == x.Code)
+            {
+                x.DefaultLang = true;
+            }
+            else
+            {
+                x.DefaultLang = false;
+            }
+        });
+        SelectedDefaultLanguege = language;
+    }
+
+
+    private void AddLenguage(string code)
+    {
+        SelectedLanguages.ForEach(x =>
+        {
+            if (x.Code == "ru" || x.Code == "en")
+            {
+                x.Selected = true;
+            }
+            else
+            {
+                if (x.Code == code)
+                {
+                    x.Selected = !x.Selected;
+                }
+            }
+        });
+        StateHasChanged();
+    }
+
+
+    void Cancel() => MudDialog.Cancel();
+
+}

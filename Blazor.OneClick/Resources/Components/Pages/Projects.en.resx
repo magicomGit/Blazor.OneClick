@@ -192,4 +192,49 @@
   <data name="until" xml:space="preserve">
     <value>until</value>
   </data>
+  <data name="OtherSettingsTitle" xml:space="preserve">
+    <value>Billing is an automated settlement system between traders and investors. Cross trading is the ability to copy trades on trading platforms other than the trader's platform.</value>
+  </data>
+  <data name="Project" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="DefaultLanguage" xml:space="preserve">
+    <value>Default Language</value>
+  </data>
+  <data name="SelectedLanguages" xml:space="preserve">
+    <value>Selected Languages</value>
+  </data>
+  <data name="AddLanguage" xml:space="preserve">
+    <value>Add Language</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="OtherSettings" xml:space="preserve">
+    <value>Other Settings</value>
+  </data>
+  <data name="TraderCount" xml:space="preserve">
+    <value>Number of traders</value>
+  </data>
+  <data name="ExchangesTitle" xml:space="preserve">
+    <value>Trading platforms where copying of transactions will be available.</value>
+  </data>
+  <data name="LanguagesCopyTrading" xml:space="preserve">
+    <value>Languages of the CopyTrading</value>
+  </data>
+  <data name="RelocateProject" xml:space="preserve">
+    <value>Relocate Project</value>
+  </data>
+  <data name="InvestorsCount" xml:space="preserve">
+    <value>Number of traders</value>
+  </data>
+  <data name="ProjectFreeze" xml:space="preserve">
+    <value>Project Freeze</value>
+  </data>
+  <data name="ProjectOwnerFreezeDescription" xml:space="preserve">
+    <value>Freezing the project will prevent copying transactions. The positions of traders and investors will not change. We recommend that you close all positions of users of the transaction copying system before freezing the project. While the project is frozen, the subscription fee will be charged at the minimum possible configuration: one trader and one investor.</value>
+  </data>
+  <data name="Freeze" xml:space="preserve">
+    <value>Freeze</value>
+  </data>
 </root>

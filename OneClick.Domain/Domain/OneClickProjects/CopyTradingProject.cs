@@ -132,12 +132,13 @@ namespace OneClick.Domain.Domain.OneClickProjects
     {
         None = 0,
         Binance = 10,
+        BingX = 90,
+        Bitget = 80,
         Bybit = 20,
-        FTX = 30,
-        Huobi = 40,
-        Kraken = 50,
+        
+        
+        
         Kucoin = 60,
         Okex = 70,
-        Bitget = 80
     }
 }

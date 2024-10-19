@@ -1,0 +1,252 @@
+﻿@using Blazor.OneClick.Components.Pages.Shared.Modals
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Localization
+@using global::OneClick.Data.Data
+@using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.UseCases.Intefaces.App
+@inject NavigationManager Navigate
+@inject IDialogService DialogService
+@inject IAppLogger _logger
+@inject ApplicationDbContext _context
+@inject IStringLocalizer<Projects> localize
+
+
+    <MudPaper MinHeight="100px" MaxWidth="1300px" Outlined Style="border:solid 1px #e19198;" Class="cust-block ma-2 ma-md-4 pa-0">
+    @if (IsAdmin)
+    {
+
+
+        @if (project?.State == ProjectState.Deleted)
+        {
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["DeleteProject"]</div>
+                    <div>Полное удаление проекта без возможности его восстановить</div>
+                </div>
+               
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="FullDeleteProject">Удалить полностью</MudButton>
+               
+            </MudStack>
+        }
+        else
+        {
+            <MudGrid Class="@("border-b-1 border-solid mud-border-secondary pa-4 " + freezeBlockVisibility)">
+                <MudItem >
+                    <MudText Typo="Typo.h6"><b>@localize["ProjectFreeze"]</b> </MudText>
+                    <div>@localize["ProjectOwnerFreezeDescription"]</div>
+                </MudItem>
+                <MudItem>
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="(()=>FreezeProject(ProjectState.FrozenByOwner))">@localize["Freeze"]</MudButton>
+                </MudItem>
+            </MudGrid>
+           
+            <div class=" border-bottom row justify-content-between m-0 @freezeBlockVisibility">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["ProjectFreeze"]</div>
+                    <div>@localize["ProjectFreezeDescription"]</div>
+                </div>
+                <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="(()=>FreezeProject(ProjectState.FrozenByAdmin))">@localize["ForciblyFreeze"]</MudButton>
+                </div>
+            </div>
+            <div class=" border-bottom row justify-content-between m-0 @runBlockVisibility">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["ProjectRun"]</div>
+                    <div>@localize["RunDescription"]</div>
+                </div>
+                <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" @onclick="RunProject">@localize["Run"]</MudButton>
+                </div>
+            </div>
+            <div class="row justify-content-between m-0 ">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["DeleteProject"]</div>
+                    <div>@localize["DeleteProjectDescription"]</div>
+                </div>
+                <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="DeleteProject">@localize["Delete"]</MudButton>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        @if (project?.State != ProjectState.Deleted && project?.State != ProjectState.DeleteProjectRequest)
+        {
+            <div class=" border-bottom row justify-content-between m-0 @freezeBlockVisibility">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["ProjectFreeze"]</div>
+                    <div>@localize["ProjectOwnerFreezeDescription"]</div>
+                </div>
+                <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="(()=>FreezeProject(ProjectState.FrozenByOwner))">@localize["Freeze"]</MudButton>
+                </div>
+            </div>
+            @if (project?.State == ProjectState.FrozenByOwner)
+            {
+                <div class=" border-bottom row justify-content-between m-0 @runBlockVisibility">
+                    <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                        <div class="fw-bold">@localize["ProjectRun"]</div>
+                        <div>@localize["RunOwnerDescription"]</div>
+                    </div>
+                    <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                        <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Success" @onclick="RunProject">@localize["Run"]</MudButton>
+                    </div>
+                </div>
+            }
+
+            <div class="row justify-content-between m-0 ">
+                <div class="m-o p-3 col-md-9 col-xl-10 row align-content-center  justify-content-start">
+                    <div class="fw-bold">@localize["DeleteProject"]</div>
+                    <div>@localize["DeleteProjectDescription"]</div>
+                </div>
+                <div class="m-0 p-3 col-md-3 col-xl-2 row align-content-center justify-content-end">
+                    <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" @onclick="DeleteProject">@localize["Delete"]</MudButton>
+                </div>
+            </div>
+        }
+
+    }
+
+
+</MudPaper>
+
+<MudMessageBox @ref="runProjectbox" Title="@localize["ProjectRun"]" CancelText="@localize["Cancel"]">
+    <MessageContent>
+        @localize["ConfirmProjectRun"]
+    </MessageContent>
+    <YesButton>
+        <MudButton Class="btn-cust" Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.PlayCircle">@localize["Run"]</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+@code {
+    [Parameter] public bool IsAdmin { get; set; }
+    //[Parameter] public CopyTradingProject? projectUI { get; set; }
+    [Parameter] public CopyTradingProject? project { get; set; }
+    
+    [Parameter] public string freezeBlockVisibility { get; set; } = "invisible";
+    [Parameter] public string runBlockVisibility { get; set; } = "invisible";
+    //public string runOwnerBlockVisibility { get; set; } = "visually-hidden";
+
+    MudMessageBox? runProjectbox { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (project.State == ProjectState.Ready)
+        {
+            freezeBlockVisibility = "visible";
+            runBlockVisibility = "invisible";
+        }
+        else
+        {
+            runBlockVisibility = "visible";
+            freezeBlockVisibility = "invisible";
+        }
+        StateHasChanged();
+    }
+
+    public async Task DeleteProject()
+    {
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var parameters = new DialogParameters<InputConfirmDialog>();
+        parameters.Add(x => x.ContentText, @localize["DeleteProjectDescriptionModal"]);
+        parameters.Add(x => x.ButtonText, @localize["Delete"]);
+        parameters.Add(x => x.Color, Color.Error);
+        parameters.Add(x => x.CheckWord, project.ProjectName);
+        parameters.Add(x => x.Icon, Icons.Material.Filled.Delete);
+
+        var dialog = await DialogService.ShowAsync<InputConfirmDialog>(@localize["Delete"], parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await _context.Projects.Where(x => x.Id == project.Id).ExecuteUpdateAsync(e => e
+               .SetProperty(project => project.State, project => ProjectState.DeleteProjectRequest)
+               .SetProperty(project => project.Synchronized, project => false));
+
+            //_context.Update(project);
+            await _context.SaveChangesAsync();
+            await Task.Delay(500);
+            Navigate.Refresh(true);
+
+
+        }
+    }
+
+    public async Task FullDeleteProject()
+    {
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var parameters = new DialogParameters<InputConfirmDialog>();
+        parameters.Add(x => x.ContentText, @localize["DeleteProjectDescriptionModal"]);
+        parameters.Add(x => x.ButtonText, @localize["Delete"]);
+        parameters.Add(x => x.Color, Color.Error);
+        parameters.Add(x => x.CheckWord, project.ProjectName);
+        parameters.Add(x => x.Icon, Icons.Material.Filled.Delete);
+
+        var dialog = await DialogService.ShowAsync<InputConfirmDialog>(@localize["Delete"], parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await _context.Projects.Where(x => x.Id == project.Id).ExecuteUpdateAsync(e => e
+               .SetProperty(project => project.State, project => ProjectState.FullDeleteProjectRequest)
+               .SetProperty(project => project.Synchronized, project => false));
+
+
+            //_context.Update(project);
+            await _context.SaveChangesAsync();
+            await Task.Delay(500);
+            Navigate.Refresh(true);
+
+
+        }
+    }
+
+    private async Task RunProject()
+    {
+        bool? result = await runProjectbox.ShowAsync();
+
+        if (result != null)
+        {
+            await _context.Projects.Where(x => x.Id == project.Id).ExecuteUpdateAsync(e => e
+                .SetProperty(project => project.State, project => ProjectState.Ready)
+                .SetProperty(project => project.Synchronized, project => false));
+
+            await _context.SaveChangesAsync();
+            await Task.Delay(500);
+            Navigate.Refresh(true);
+        }
+
+    }
+
+
+
+    private async Task FreezeProject(ProjectState state)
+    {
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var parameters = new DialogParameters<InputConfirmDialog>();
+        parameters.Add(x => x.ContentText, @localize["FreezeProjectDescriptionModal"]);
+        parameters.Add(x => x.ButtonText, @localize["Freeze"]);
+        parameters.Add(x => x.Color, Color.Warning);
+        parameters.Add(x => x.CheckWord, project.ProjectName);
+        parameters.Add(x => x.Icon, Icons.Material.Filled.PauseCircle);
+
+        var dialog = await DialogService.ShowAsync<InputConfirmDialog>(localize["Freeze"], parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await _context.Projects.Where(x => x.Id == project.Id).ExecuteUpdateAsync(e => e
+                .SetProperty(project => project.State, project => state)
+                .SetProperty(project => project.Synchronized, project => false));
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInfo("Проект " + project.ProjectName + " " + localize[state.ToString()]);
+            await Task.Delay(500);
+            Navigate.Refresh(true);
+
+        }
+    }
+}

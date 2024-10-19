@@ -1,7 +1,9 @@
 ﻿@page "/Projects/{id:int}"
 @using Blazor.OneClick.Components.Pages.Shared.AppProject
+@using Blazor.OneClick.Components.Pages.Shared.Modals
 @using Blazor.OneClick.Components.Pages.Shared.SVG
 @using Blazor.OneClick.Helpers
+@using Blazor.OneClick.Models
 @using CloudFlare.Client.Enumerators
 @using Microsoft.Extensions.Localization
 @using global::OneClick.Data.Data
@@ -14,6 +16,7 @@
 @inject IAppSettingsRepository _settingsRepository
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject IAppLogger _logger;
+@inject IDialogService _dialogService
 
 <PageTitle>@localize["Project"] | CopyTrader</PageTitle>
 
@@ -52,46 +55,94 @@
         else
         {
             <ProjectHead isAdmin=_isAdmin localize="localize" project="_project" />
-            <MudStack Row Justify="Justify.SpaceBetween" Class="mt-5">
+            <MudStack Row Justify="Justify.SpaceBetween" StretchItems="StretchItems.All" Wrap="Wrap.Wrap" Spacing="9" Class="my-7">
+                @* Users *@
                 <div>
                     <MudText Typo="Typo.h5" Class="mb-3">@localize["Users"]</MudText>
-                    <MudStack Row Wrap="Wrap.Wrap">
-                        <div class="ma-2">
-                            <MudText Typo="Typo.h5" Inline Class="secondary-light">@localize["TraderCount"]: </MudText>
-                            <MudText Typo="Typo.h5" Inline Style=" font-weight: bold">@_project.TraderCount</MudText>
+                    <MudStack Row="false" Spacing="1">
+                        <div class="mx-2">
+                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@localize["TraderCount"]: </MudText>
+                            <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_project.TraderCount</MudText>
                         </div>
-                        <div class="ma-2">
-                            <MudText Typo="Typo.h5" Inline Class="secondary-light">@localize["InvestorsCount"]: </MudText>
-                            <MudText Typo="Typo.h5" Inline Style=" font-weight: bold">@_project.UserCount</MudText>
+                        <div class="mx-2">
+                            <MudText Typo="Typo.h6" Inline Class="secondary-light">@localize["InvestorsCount"]: </MudText>
+                            <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_project.UserCount</MudText>
                         </div>
                     </MudStack>
 
                 </div>
-
+                @* Exchanges *@
                 <div>
-                    <MudText Typo="Typo.h5" Class="mb-3">@localize["Exchanges"]</MudText>
-                    <MudStack Row="false" Wrap="Wrap.Wrap">
+                    <MudStack Row Spacing="2">
+                        <MudText Typo="Typo.h5" Class="mb-3">@localize["Exchanges"]</MudText>
+                        <div class="mt-2">
+                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@localize["ExchangesTitle"]">
+                                <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.HelpOutline" Style="width:20px; height:20px; margin-bottom: 5px;"></MudIcon>
+                            </MudTooltip>
+                        </div>
+                    </MudStack>
+
+                    <MudGrid Class="ma-0">
                         @foreach (ExchangeMarket exchange in Enum.GetValues(typeof(ExchangeMarket)))
                         {
-                             
+
                             if (exchange == ExchangeMarket.None)
                             {
                                 continue;
                             }
+                            <MudItem xs="6" Class="pa-0">
+                                <MudCheckBox T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
 
-                            <MudCheckBox T="bool" Value="@(_project.Exchanges.Contains(exchange))" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
+                            </MudItem>
                         }
 
+                    </MudGrid>
+
+                </div>
+                @* Other *@
+                <div>
+
+                    <MudStack Row Spacing="2">
+                        <MudText Typo="Typo.h5" Class="mb-3">@localize["OtherSettings"]</MudText>
+                        <div class="mt-2">
+                            <MudTooltip Arrow="true" Placement="Placement.Top" Color="Color.Primary" Text="@localize["OtherSettingsTitle"]">
+                                <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.HelpOutline" Style="width:20px; height:20px; margin-bottom: 5px;"></MudIcon>
+                            </MudTooltip>
+                        </div>
                     </MudStack>
+                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.BillingEnabled" Label="@localize["Billing"]" Size="Size.Small"></MudCheckBox>
+                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.CrossTradingEnabled" Label="@localize["CrossTrading"]" Size="Size.Small"></MudCheckBox>
+                    <hr />
+                    <MudText>@localize["DefaultLanguage"]: <strong>@(" " + SelectedDefaultLanguege?.Name)</strong></MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="my-2">
+                        <MudText>@localize["SelectedLanguages"]: (@SelectedLanguages?.Where(x => x.Selected).Count())</MudText>
+                        <MudButton OnClick="(AddLanduageDialog)" Color="Color.Primary" Class="py-0"><MudText>@localize["AddLanguage"]</MudText> </MudButton>
+                    </MudStack>
+
 
                 </div>
 
+            </MudStack>
+
+            <MudDivider />
+
+            <MudStack Row Justify="Justify.FlexEnd" Class="my-4">
+                <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" OnClick="RelocateDialog">@localize["RelocateProject"]</MudButton>
+
+                <MudButton OnClick="CreateProject" Class="" Color="Color.Primary" Variant="Variant.Filled">@localize["SaveChanges"]</MudButton>
             </MudStack>
 
 
         }
     }
 </MudPaper>
+
+@if (!_isLoading && _project != null)
+{
+    <ProjectServiceBlock IsAdmin="_isAdmin" project="_project"
+                         freezeBlockVisibility="@freezeBlockVisibility" runBlockVisibility="@runBlockVisibility" />
+}
+
 
 @code {
     [Parameter]
@@ -100,10 +151,25 @@
     private bool _isLoading { get; set; } = true;
     private bool _isAdmin { get; set; } = true;
 
+    List<LanguageModel>? SelectedLanguages { get; set; }
+    LanguageModel? SelectedDefaultLanguege { get; set; }
+
     private string _projectStateColor = "Red";
     private string _projectPingColor = "Red";
 
+    private string freezeBlockVisibility = "invisible";
+    private string runBlockVisibility = "invisible";
+
     private CopyTradingProject? _project { get; set; }
+    private Dictionary<ExchangeMarket, bool> _exchanges { get; set; } = new Dictionary<ExchangeMarket, bool>
+    {
+        {ExchangeMarket.Binance, false},
+        {ExchangeMarket.Bitget, false},
+        {ExchangeMarket.BingX, false},
+        {ExchangeMarket.Bybit, false},
+        {ExchangeMarket.Kucoin, false},
+        {ExchangeMarket.Okex, false},
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -116,9 +182,67 @@
         _isAdmin = Helper.CheckIsAdmin(authState);
 
         _project = await _projectRepository.GetById(id ?? 0, true, false);
+
+        foreach (var item in _project?.Exchanges)
+        {
+            _exchanges[item] = true;
+        }
+
+
+        //языки
+        SelectedDefaultLanguege = new LanguageModel { Code = _project.DefaultLanguage };
+        SelectedLanguages = LanguageStaff.Languages.Select(s => new LanguageModel { Code = s.code, Name = s.name }).ToList();
+        SelectedLanguages[0].Selected = true;
+        SelectedLanguages[1].Selected = true;
+
+        _project.Languages?.ForEach(x =>
+        {
+            SelectedLanguages.ForEach(s =>
+            {
+                if (s.Code == x.Code)
+                {
+                    s.Selected = true;
+                }
+            });
+
+        });
+
+        var languageResult = SelectedLanguages.Where(x => x.Code == SelectedDefaultLanguege.Code).FirstOrDefault();
+        if (languageResult != null)
+        {
+            SelectedDefaultLanguege = languageResult;
+            var ind = SelectedLanguages.FindIndex(x => x.Code == languageResult.Code);
+            SelectedLanguages[ind].DefaultLang = true;
+        }
+        else
+        {
+            SelectedDefaultLanguege = new LanguageModel { Code = "ru", Name = "Русский", DefaultLang = true };
+            SelectedLanguages[0].DefaultLang = true;
+        }
+
+
         _isLoading = false;
         StateHasChanged();
     }
+
+
+    async void AddLanduageDialog()
+    {
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        var parameters = new DialogParameters<LenguageSelectModal>();
+        parameters.Add(x => x.SelectedLanguages, SelectedLanguages);
+        parameters.Add(x => x.SelectedDefaultLanguege, SelectedDefaultLanguege);
+
+        var dialog = await _dialogService.ShowAsync<LenguageSelectModal>(@localize["LanguagesCopyTrading"], parameters, options);
+        var result = await dialog.Result;
+        if (result.Canceled)
+        {
+            SelectedDefaultLanguege = SelectedLanguages.Where(x => x.DefaultLang).FirstOrDefault();
+            StateHasChanged();
+        }
+    }
+
 
     private void ShowTariffDialog()
     {
@@ -134,7 +258,18 @@
     {
 
     }
+
     private void AddDomainDialog()
+    {
+
+    }
+
+    private void CreateProject()
+    {
+
+    }
+
+    private void RelocateDialog()
     {
 
     }

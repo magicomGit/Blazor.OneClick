@@ -1,0 +1,56 @@
+﻿@using Microsoft.Extensions.Localization
+
+@inject IStringLocalizer<Projects> localize
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+        <MudText Color="Color.Error">@CheckWord</MudText>
+        <MudTextField T="string" Label="@localize["EnterName"]" @bind-Value="inputWord" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Class="btn-cust" Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">@localize["Cancel"]</MudButton>
+        <MudButton Disabled="_processing" Class="btn-cust" Variant="Variant.Filled" StartIcon="@Icon" OnClick="Submit" Color="@Color">
+            @if (_processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">@ButtonText</MudText>
+            }
+            else
+            {
+                <MudText> @ButtonText</MudText>
+            }
+        </MudButton>
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public string CheckWord { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+    [Parameter] public string Icon { get; set; }
+
+    bool _processing { get; set; }
+
+    string inputWord { get; set; } = "";
+
+    async void Submit()
+    {
+        if (CheckWord == inputWord)
+        {
+            await Task.Run(() => { _processing = true; });
+
+            MudDialog.Close(DialogResult.Ok(true));
+
+        }
+    }
+    void Cancel() => MudDialog.Cancel();
+}
