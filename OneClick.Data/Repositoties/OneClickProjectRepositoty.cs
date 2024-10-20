@@ -75,7 +75,7 @@ namespace OneClick.Data.Repositoties
         {
             var projects = new List<CopyTradingProject>();
 
-            var projectEntities = await _context.Projects.ToListAsync();
+            var projectEntities = await _context.Projects.AsNoTracking().Include(x => x.Payment).ToListAsync();
 
             if (projectEntities == null)
             {
@@ -112,7 +112,7 @@ namespace OneClick.Data.Repositoties
         {
             var projects = new List<CopyTradingProject>();
 
-            var projectEntities = await _context.Projects.Where(x => x.OwnerId == ownerId).ToListAsync();
+            var projectEntities = await _context.Projects.Where(x => x.OwnerId == ownerId).AsNoTracking().Include(x => x.Payment).ToListAsync();
 
             if (projectEntities == null)
             {

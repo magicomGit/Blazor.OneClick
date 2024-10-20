@@ -10,6 +10,7 @@ namespace OneClick.Domain.Domain.Customers
         public string? Telegram { get; set; }
         public string? FirstName { get; set; }
         public string? Phone { get; set; }
+        public string? Email { get; set; }
         public string? Avatar { get; set; }
         public List<CustomerAlert>? Alerts { get; set; }
         public CustomerBalance Balance { get; set; }
@@ -21,7 +22,7 @@ namespace OneClick.Domain.Domain.Customers
         public UserTheme Theme { get; set; }
 
 
-        public Customer(string id, string userName, long telegramId, string telegram, string firstName, string phone, string avatar,
+        public Customer(string id, string userName, long telegramId, string telegram, string firstName, string phone, string email, string avatar,
             List<CustomerAlert> alerts, CustomerBalance balance, DateTime registered, DateTime lastActivity, CustomerPayment payment, string? language, UserTheme theme)
         {
             Id = id;
@@ -30,6 +31,7 @@ namespace OneClick.Domain.Domain.Customers
             Telegram = telegram;
             FirstName = firstName;
             Phone = phone;
+            Email = email;
             Avatar = avatar;
             Alerts = alerts;
             Balance = balance;

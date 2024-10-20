@@ -1,0 +1,44 @@
+﻿@page "/users/{id}"
+@inject IStringLocalizer<Users> localize
+
+
+@using Blazor.OneClick.Components.Pages.Shared.AppUsers
+@using Microsoft.Extensions.Localization
+
+@if (id == "all")
+{
+    <PageTitle>@localize["Users"] | CopyTrader</PageTitle>
+
+    <AllUsers />
+}
+else
+{
+    <PageTitle>@localize["User"] | CopyTrader</PageTitle>
+
+    <User Id="@id" localize="localize"/>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery] public string? id { get; set; }
+
+    private bool _isLoading { get; set; } = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+
+        if (string.IsNullOrEmpty(id))
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+}

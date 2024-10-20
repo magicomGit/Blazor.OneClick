@@ -9,10 +9,10 @@ namespace OneClick.Services.Balances
 {
     public class Transactions : ITransactions<Response<OneClickTransaction>, OneClickTransaction>
     {
-        private ITransactionRepository<OneClickTransaction> _transactionRepository;
+        private ITransactionRepository<Response<OneClickTransaction>, OneClickTransaction> _transactionRepository;
         private IUserRepository _userRepository;
         private IAppLogger _logger;
-        public Transactions(ITransactionRepository<OneClickTransaction> transactionRepository, IUserRepository userRepository, IAppLogger logger)
+        public Transactions(ITransactionRepository<Response<OneClickTransaction>, OneClickTransaction> transactionRepository, IUserRepository userRepository, IAppLogger logger)
         {
             _transactionRepository = transactionRepository;
             _userRepository = userRepository;
@@ -45,23 +45,24 @@ namespace OneClick.Services.Balances
                     description, TransactionType.Deposit,TransactionStatus.Await, operations);
 
 
-                var result = await _transactionRepository.Add(newTransaction);
+                var addResult = await _transactionRepository.Add(newTransaction);
 
-
-                if (result)
+                if (addResult.Success)
                 {
                     response.Success = false;
                     response.Message = "ApplyDeposit error ";
                     return response;
                 }
+                else
+                {
+                    response.Data = addResult.Data;
+                }
 
-
-                response.Message = user.UserName + " / Summ: " + summ + " / " + TransactionCode.ApplyDeposit.ToString();
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = "ApplyDeposit " + ex.Message;
+                response.Message = "ApplyDeposit error" + ex.Message;
                 return response;
             }
 
@@ -74,13 +75,15 @@ namespace OneClick.Services.Balances
             var response = new Response<OneClickTransaction> { Success = true };
             try
             {
-                var transaction = await _transactionRepository.GetById(transactionId);
-                if (transaction == null)
+                var transactionResult = await _transactionRepository.GetById(transactionId);
+                if (!transactionResult.Success)
                 {
                     response.Success = false;
                     response.Message = "Не найдена транзакция " + transactionId;
                     return response;
                 }
+
+                var transaction = transactionResult.Data;
 
                 var user = await _userRepository.GetByIdAsync(transaction.IssuerId.ToString());
                 if (user.Balance == null)
@@ -128,7 +131,7 @@ namespace OneClick.Services.Balances
 
                 var userUpdateResult = await _userRepository.UpdateBalanceAsync(user);
 
-                if (transactionUpdateResult && userUpdateResult)
+                if (transactionUpdateResult.Success && userUpdateResult)
                 {
                     _logger.LogTransaction($"Платежная система: {transaction.PaySystem} | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} |  Summ: {summ}$ | Пользователь: {user.UserName} | Transaction Id: {transaction.Id}");
                 }

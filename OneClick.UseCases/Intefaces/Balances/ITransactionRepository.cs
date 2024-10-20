@@ -1,10 +1,10 @@
 ﻿namespace OneClick.UseCases.Intefaces.Balances
 {
-    public interface ITransactionRepository<TTransaction>
+    public interface ITransactionRepository<IResponse,TTransaction>
     {
-        Task<TTransaction> GetById(long transactionId);
+        Task<IResponse> GetById(long transactionId);
         Task<List<TTransaction>> Get();
-        Task<bool> Update(TTransaction transaction);
-        Task<bool> Add(TTransaction transaction);
+        Task<IResponse> Update(TTransaction transaction);
+        Task<IResponse> Add(TTransaction transaction);
     }
 }

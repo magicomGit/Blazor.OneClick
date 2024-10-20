@@ -78,8 +78,8 @@ builder.Services.AddLocalization(options =>
 builder.Services.AddScoped<IOneClickProjectRepositoty, OneClickProjectRepositoty>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
-builder.Services.AddScoped<ITransactionRepository<OneClickTransaction>, TransactionRepository>();
-builder.Services.AddScoped<ITransactions<AppResponse>, Transactions>();
+builder.Services.AddScoped<ITransactionRepository<Response<OneClickTransaction>, OneClickTransaction>, TransactionRepository>();
+builder.Services.AddScoped<ITransactions<Response<OneClickTransaction>, OneClickTransaction>, Transactions>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAppLogger, AppLogger>();
 builder.Services.AddScoped<IPayments, Payments>();

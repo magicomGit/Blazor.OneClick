@@ -88,7 +88,7 @@ namespace OneClick.Data.Repositoties
 
 
 
-            var customer = new Customer(user.Id, user.UserName, user.TelegramId, user.Telegram, user.FirstName, user.Phone, user.Avatar, customerAlerts,
+            var customer = new Customer(user.Id, user.UserName, user.TelegramId, user.Telegram, user.FirstName, user.Phone, user.Email, user.Avatar, customerAlerts,
                 customerBalance, user.Registered, user.LastActivity, customerPayment, user.Language, user.Theme);
 
             return customer;
@@ -102,22 +102,22 @@ namespace OneClick.Data.Repositoties
             var customerBalance = new CustomerBalance();
             var customerAlerts = new List<CustomerAlert>();
 
-            var userQuery = _context.Users.Where(x => x.Id == id).AsNoTracking();
+            var userQuery = _context.Users.Where(x => x.Id == id).Include(x => x.Balance).Include(x => x.PaymentInfo).AsNoTracking();
 
-            if (requireBalnce)
-            {
-                userQuery = userQuery.Include(x => x.Balance);
-            }
+            //if (requireBalnce)
+            //{
+            //    userQuery = userQuery.Include(x => x.Balance);
+            //}
 
-            if (requirePayment)
-            {
-                userQuery = userQuery.Include(x => x.PaymentInfo);
-            }
+            //if (requirePayment)
+            //{
+            //    userQuery = userQuery.Include(x => x.PaymentInfo);
+            //}
 
-            if (requireAlerts)
-            {
-                userQuery = userQuery.Include(x => x.Alerts);
-            }
+            //if (requireAlerts)
+            //{
+            //    userQuery = userQuery.Include(x => x.Alerts);
+            //}
 
             var user = await userQuery.FirstOrDefaultAsync();
 
@@ -168,7 +168,7 @@ namespace OneClick.Data.Repositoties
 
 
 
-            var customer = new Customer(user.Id, user.UserName, user.TelegramId, user.Telegram, user.FirstName, user.Phone, user.Avatar, customerAlerts,
+            var customer = new Customer(user.Id, user.UserName, user.TelegramId, user.Telegram, user.FirstName, user.Phone, user.Email, user.Avatar, customerAlerts,
                 customerBalance, user.Registered, user.LastActivity, customerPayment, user.Language, user.Theme);
 
             return customer;

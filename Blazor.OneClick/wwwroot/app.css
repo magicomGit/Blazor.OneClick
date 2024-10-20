@@ -47,6 +47,14 @@ body a {
     color: var(--mud-palette-secondary-lighten) !important;
 }
 
+.mud-tab-slider {
+    background-color: var(--mud-palette-secondary) !important;
+}
+
+.secondary-dark {
+    color: var(--mud-palette-secondary-darken) !important;
+}
+
 .cust-block {
     /*border: solid 1px #d2d2d2;*/
     border-radius: 10px !important;

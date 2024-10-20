@@ -2,11 +2,12 @@
 using OneClick.Data.Data;
 using OneClick.Data.Dto;
 using OneClick.Domain.Domain.Balances;
+using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.Balances;
 
 namespace OneClick.Data.Repositoties
 {
-    public class TransactionRepository : ITransactionRepository<OneClickTransaction>
+    public class TransactionRepository : ITransactionRepository<Response<OneClickTransaction>, OneClickTransaction>
     {
         private ApplicationDbContext _context;
         public TransactionRepository(ApplicationDbContext context)
@@ -14,25 +15,34 @@ namespace OneClick.Data.Repositoties
             _context = context;
         }
 
-        public async Task<bool> Add(OneClickTransaction transaction)
+        public async Task<Response<OneClickTransaction>> Add(OneClickTransaction transaction)
         {
-            await _context.AddAsync(OneClickTransactionDto.TransactionDto(transaction));
-            var result = await _context.SaveChangesAsync();
+            var response = new Response<OneClickTransaction> { Success = true };
 
-            if (result > 0)
+            var addResult = await _context.AddAsync(OneClickTransactionDto.TransactionDto(transaction));
+
+
+            var saveResult = await _context.SaveChangesAsync();
+
+            var entity = addResult.Entity;
+
+            if (saveResult == 0)
             {
-                return true;
+                response.Success = false;
+                response.Message = "Save Transaction error";
+                return response;
             }
-            else
-            {
-                return false;
-            }
+
+            var newTransaction = OneClickTransactionDto.TransactionDto(entity);
+
+            response.Data = newTransaction;
+            return response;
         }
 
         public async Task<List<OneClickTransaction>> Get()
         {
             var oneClickTransactions = new List<OneClickTransaction>();
-            var transactions = await _context.Transactions.ToListAsync();
+            var transactions = await _context.Transactions.AsNoTracking().ToListAsync();
 
             if (transactions != null)
             {
@@ -41,28 +51,41 @@ namespace OneClick.Data.Repositoties
             return oneClickTransactions;
         }
 
-        public async Task<OneClickTransaction> GetById(long transactionId)
+        public async Task<Response<OneClickTransaction>> GetById(long transactionId)
         {
-            var transaction = await _context.Transactions.Where(x => x.Id == transactionId).FirstOrDefaultAsync();
+            var response = new Response<OneClickTransaction> { Success = true };
 
-            if (transaction != null)
+            var entity = await _context.Transactions.Where(x => x.Id == transactionId).AsNoTracking().FirstOrDefaultAsync();
+
+            if (entity != null)
             {
-                return OneClickTransactionDto.TransactionDto(transaction);
+                response.Data = OneClickTransactionDto.TransactionDto(entity);
+                return response;
             }
-            return null;
+            else
+            {
+                response.Success = false;
+                return response;
+            }
+
+            
         }
 
-        public async Task<bool> Update(OneClickTransaction transaction)
+        public async Task<Response<OneClickTransaction>> Update(OneClickTransaction transaction)
         {
-
-            _context.Update(transaction);
+            var response = new Response<OneClickTransaction> { Success = true };
+            var entity = _context.Transactions.Update(OneClickTransactionDto.TransactionDto(transaction));
             var resultSave = await _context.SaveChangesAsync();
-            if (resultSave != 1)
+            if (resultSave > 0)
             {
-                return false;
+                response.Data = OneClickTransactionDto.TransactionDto(entity.Entity);
+                return response;
             }
-
-            return true;
+            else
+            {
+                response.Success = false;
+                return response;
+            }
         }
     }
 }

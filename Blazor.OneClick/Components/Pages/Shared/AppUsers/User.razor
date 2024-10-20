@@ -1,0 +1,78 @@
+﻿@using Microsoft.Extensions.Localization
+@using global::OneClick.Domain.Domain.Customers
+@using global::OneClick.UseCases.Intefaces.User
+@inject IUserRepository _userRepository
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    @if (_isLoading)
+    {
+        <MudSkeleton Height="10" />
+        <MudSkeleton Animation="Animation.False" Height="70px" />
+        <MudSkeleton Animation="Animation.Wave" Height="100px" />
+        <MudSkeleton Animation="Animation.False" Height="90px" />
+        <MudSkeleton Animation="Animation.Wave" Height="130px" />
+        <MudSkeleton Animation="Animation.False" Height="50px" />
+        <MudSkeleton Animation="Animation.Wave" Height="100px" />
+    }
+    else
+    {
+        <MudTabs Elevation="2" Rounded="true" Color="Color.Dark" PanelClass="pa-6">
+            <MudTabPanel>
+                <ChildContent>
+                    <UserForm Customer="_customer" localize="localize"/>
+                </ChildContent>
+                <TabContent>
+                    <MudText Class="secondary-dark" Typo="Typo.h6">Профиль</MudText>
+
+                </TabContent>
+            </MudTabPanel>
+            <MudTabPanel>
+                <ChildContent>
+
+                </ChildContent>
+                <TabContent>
+                    <MudText Class="secondary-dark" Typo="Typo.h6">Баланс</MudText>
+                </TabContent>
+            </MudTabPanel>
+            <MudTabPanel>
+                <ChildContent>
+
+                </ChildContent>
+                <TabContent>
+                    <MudText Class="secondary-dark" Typo="Typo.h6">Пароль</MudText>
+
+                </TabContent>
+            </MudTabPanel>
+        </MudTabs>
+    }
+
+</MudPaper>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public IStringLocalizer<Users> localize { get; set; }
+    private Customer? _customer { get; set; }
+    private bool _isLoading { get; set; } = true;
+
+    protected override async void OnParametersSet()
+    {
+        if (Id is not null)
+        {
+            _customer = await _userRepository.GetByIdAsync(Id);
+
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // if (!firstRender)
+        // {
+        //     return;
+        // }
+
+        // _customer = await _userRepository.GetByIdAsync(Id);
+
+    }
+}

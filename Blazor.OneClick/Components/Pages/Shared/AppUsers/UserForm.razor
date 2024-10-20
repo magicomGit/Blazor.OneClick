@@ -1,0 +1,205 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@using Microsoft.Extensions.Localization
+@using global::OneClick.Data.Data
+@using global::OneClick.Domain.Domain.Customers
+
+
+<EditForm Model="@_user" OnValidSubmit="OnValidSubmit">
+
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" md="4" lg="3">
+            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2 pa-0">
+                        <MudImage Src="@_user.Avatar" Class="mx-auto" />
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+        </MudItem>
+
+        <MudItem xs="12" md="9" lg="6">
+            <MudTextField Disabled Label="Login" Variant="Variant.Filled" @bind-Value="_user.Login" />
+            <MudTextField Disabled Label="Telegram" Variant="Variant.Outlined" Class="mt-3" @bind-Value="_user.Telegram" />
+            <MudTextField Label="First name" Variant="Variant.Outlined" Class="mt-3" @bind-Value="_user.FirstName" />
+        </MudItem>
+
+
+        <MudItem xs="12" md="9" >
+            <MudGrid>
+                <MudItem xs="12" lg="6" >
+                    <MudTextField  Label="Tel" Variant="Variant.Outlined" @bind-Value="_user.Phone" />
+                </MudItem>
+            
+           
+                <MudItem xs="12" lg="6">
+                    <MudTextField  Label="Email" Variant="Variant.Outlined" @bind-Value="_user.Email" />
+                </MudItem>
+
+            </MudGrid>
+        </MudItem>
+       
+        <MudItem xs="12" md="9" >
+            <MudGrid>
+                <MudItem xs="12" lg="6" >
+                    <MudSelect  Label="Tel" Variant="Variant.Outlined" @bind-Value="_user.Status">
+
+                    </MudSelect>
+                </MudItem>
+            
+           
+                <MudItem xs="12" lg="6">
+                    <MudSelect  Label="Email" Variant="Variant.Outlined" @bind-Value="_user.Roles" />
+                </MudItem>
+
+            </MudGrid>
+        </MudItem>
+       
+    </MudGrid>
+
+    <MudDivider />
+
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudButton>
+</EditForm>
+
+@code {
+    private UserModel _user { get; set; }
+
+    [Parameter] public IStringLocalizer<Users> localize { get; set; }
+    [Parameter] public Customer? Customer { get; set; }
+
+    List<string>? _formErrors { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Customer is null)
+        {
+            return;
+        }
+        _user = new UserModel
+            {
+                Avatar = Customer.Avatar,
+                Balance = Customer.Balance,
+                Email = Customer.Email,
+                FirstName = Customer.FirstName,
+                LastActivity = Customer.LastActivity,
+                Login = Customer.UserName,
+                Network = Customer.Balance.Network,
+                WalletAddress = Customer.Balance.WalletAddress,
+                Phone = Customer.Phone,
+                ProjectCount = 0,
+                Registered = Customer.Registered,
+                Roles = "",
+                Status = UserStatus.Active,
+                Telegram = Customer.Telegram,
+                TelegramId = Customer.TelegramId,
+            };
+
+        StateHasChanged();
+    }
+
+    private void OnValidSubmit()
+    {
+        _formErrors = ValidateModelAsync(_user);
+
+    }
+
+    private async void UploadFiles(IBrowserFile file)
+    {
+
+    }
+
+    private List<string> ValidateModelAsync(UserModel model)
+    {
+        List<string> errors = new List<string>();
+
+
+
+        Regex regexName = new Regex(@"^[a-zA-Z]{1}[a-zA-Z0-9]{4,50}$");
+        Match matchName = regexName.Match(model.Login);
+        if (!matchName.Success)
+        {
+            errors.Add(localize["UserNameSymbols"]);
+        }
+
+
+        if (!string.IsNullOrEmpty(model.FirstName))
+        {
+            Regex regexFirstName = new Regex(@"^[а-яА-Яa-zA-Z]{1}[а-яА-Яa-zA-Z0-9]{2,50}$");
+            Match matchFirstName = regexFirstName.Match(model.FirstName);
+
+            if (!matchFirstName.Success)
+            {
+                errors.Add(localize["FirstNameSymbols"]);
+            }
+        }
+
+
+
+        if (!string.IsNullOrEmpty(model.Network))
+        {
+            Regex regexNetwork = new Regex(@"^[a-zA-Z0-9]{1,50}$");
+            Match matchNetwork = regexNetwork.Match(model.Network);
+            if (!matchNetwork.Success)
+            {
+                errors.Add(localize["NetworkSymbols"]);
+            }
+        }
+
+
+        if (!string.IsNullOrEmpty(model.WalletAddress))
+        {
+            Regex regexWalletAddress = new Regex(@"^[a-zA-Z0-9]{1,50}$");
+            Match matchWalletAddress = regexWalletAddress.Match(model.WalletAddress);
+            if (!matchWalletAddress.Success)
+            {
+                errors.Add(localize["WalletAddressSymbols"]);
+            }
+        }
+
+
+
+
+        return errors;
+    }
+
+
+
+    public class UserModel
+    {
+        [Required]
+        [RegularExpression(@"^[a-zA-Z]{1}[a-zA-Z0-9]{4,50}$",
+         ErrorMessage = "Логин должен содержать не менее 5 символов, только латиницу и цифры")]
+        [Display(Name = "Name")]
+        public string? Login { get; set; }
+
+
+        [RegularExpression(@"^[а-яА-Яa-zA-Z]{1}[а-яА-Яa-zA-Z0-9]{2,50}$",
+         ErrorMessage = "Имя должно содержать не менее 3 символов, кирилицу, латиницу и цифры")]
+        public string? FirstName { get; set; }
+
+
+        public string? Telegram { get; set; }
+        public long TelegramId { get; set; }
+
+
+        [Phone(ErrorMessage = "Не правильный формат Phone")]
+        public string? Phone { get; set; }
+
+
+        [EmailAddress(ErrorMessage = "Не правильный формат Email")]
+        public string? Email { get; set; }
+
+        public string? Roles { get; set; }
+        public string? Network { get; set; }
+        public string? WalletAddress { get; set; }
+        public UserStatus Status { get; set; }
+        public CustomerBalance? Balance { get; set; }
+        public DateTime Registered { get; set; }
+        public DateTime LastActivity { get; set; }
+        public string? Avatar { get; set; } = "";
+        public int ProjectCount { get; set; }
+
+
+    }
+}

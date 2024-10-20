@@ -3,11 +3,12 @@
 @using Microsoft.Extensions.Localization
 @using MudBlazor
 @using global::OneClick.Data.Data
+@using global::OneClick.Domain.Domain.Balances
 @using global::OneClick.Domain.Enums.Transaction
 @using global::OneClick.Services.Contracts
 @using global::OneClick.UseCases.Intefaces.Balances
 @inject IStringLocalizer<Referals> localize
-@inject ITransactions<AppResponse> _transactions
+@inject ITransactions<Response<OneClickTransaction>, OneClickTransaction> _transactions
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 
