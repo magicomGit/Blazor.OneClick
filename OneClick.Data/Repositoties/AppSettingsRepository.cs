@@ -17,14 +17,14 @@ namespace OneClick.Data.Repositoties
 
         public async Task<ServicesPrice> GetServicesPrices()
         {
-            var priceJson = await _context.Settings.Where(x => x.Name == AppSettings.ServicesPrice).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            var priceJson = await _context.Settings.Where(x => x.Name == SettingsNames.ServicesPrice).Select(s => s.JsonObject).FirstOrDefaultAsync();
 
             if (priceJson == null)
             {
-                await _context.Settings.AddAsync(new SystemSettings { Name = AppSettings.ServicesPrice, JsonObject = GetPriceJson(new ServicesPrice()) });
+                await _context.Settings.AddAsync(new SystemSettings { Name = SettingsNames.ServicesPrice, JsonObject = GetPriceJson(new ServicesPrice()) });
                 await _context.SaveChangesAsync();
 
-                priceJson = await _context.Settings.Where(x => x.Name == AppSettings.ServicesPrice).Select(s => s.JsonObject).FirstOrDefaultAsync();
+                priceJson = await _context.Settings.Where(x => x.Name == SettingsNames.ServicesPrice).Select(s => s.JsonObject).FirstOrDefaultAsync();
                 //log
             }
 
@@ -45,9 +45,49 @@ namespace OneClick.Data.Repositoties
         }
 
 
+        
+        public async Task<AppSettings> GetAppSettings()
+        {
+            var appSettingsJson = await _context.Settings.Where(x => x.Name == SettingsNames.AppSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
+
+            if (appSettingsJson == null)
+            {
+                await _context.Settings.AddAsync(new SystemSettings { Name = SettingsNames.AppSettings, JsonObject = GetAppSettingsJson(new AppSettings()) });
+                await _context.SaveChangesAsync();
+
+                appSettingsJson = _context.Settings.Where(x => x.Name == SettingsNames.AppSettings).Select(s => s.JsonObject).FirstOrDefault();
+                //log
+            }
+
+
+            var appSettings = new AppSettings();
+            try
+            {
+                appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
+
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+           
+
+            return appSettings;
+        }
+
+
+        //================= private methods ========================
         private static string GetPriceJson(ServicesPrice price)
         {
             return JsonConvert.SerializeObject(price, Formatting.Indented);
         }
+
+        public static string GetAppSettingsJson(AppSettings price)
+        {
+
+            return JsonConvert.SerializeObject(price, Formatting.Indented);
+        }
+
     }
 }

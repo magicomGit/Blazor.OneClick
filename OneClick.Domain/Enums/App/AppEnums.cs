@@ -2,7 +2,7 @@
 {
     public class AppEnums
     {
-        public enum AppSettings
+        public enum SettingsNames
         {
             ServicesPrice,
             AppSettings,
@@ -10,6 +10,18 @@
             BillingSettings,
             DefaultAvatar,
             SystemLogo
+
+        }
+
+        public enum ReminderSet
+        {
+            None,
+            Everyday,
+            OnceAWeek,
+            TwiceAWeek,
+            OnceAMonth,
+            TwiceAMonth,
+            AfterRegister
 
         }
     }

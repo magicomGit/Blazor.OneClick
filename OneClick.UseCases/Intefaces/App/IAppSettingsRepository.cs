@@ -5,5 +5,6 @@ namespace OneClick.UseCases.Intefaces.App
     public interface IAppSettingsRepository
     {
         Task<ServicesPrice> GetServicesPrices();
+        Task<AppSettings> GetAppSettings();
     }
 }

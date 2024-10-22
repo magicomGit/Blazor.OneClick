@@ -1,0 +1,51 @@
+﻿@page "/branding"
+@using global::OneClick.Domain.Domain.DomainServices
+@using global::OneClick.UseCases.Intefaces.App
+
+@inject IAppSettingsRepository _settingsRepository
+@if (_isLoading)
+{
+    
+}
+else
+{
+    <EditForm Model="@_settings" OnValidSubmit="OnValidSubmit">
+        <MudItem xs="12" md="9">
+            <MudGrid>
+                <MudItem xs="12" lg="6">
+                    <MudTextField Label="Tel" Variant="Variant.Outlined" @bind-Value="_settings.SystemName" />
+                </MudItem>
+
+
+                <MudItem xs="12" lg="6">
+                    <MudTextField Label="Email" Variant="Variant.Outlined" @bind-Value="_settings.SystemDomain" />
+                </MudItem>
+
+            </MudGrid>
+        </MudItem>
+
+    </EditForm>
+}
+
+@code {
+    private AppSettings? _settings { get; set; }
+    private bool _isLoading { get; set; } = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _settings = await _settingsRepository.GetAppSettings();
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnValidSubmit()
+    {
+
+    }
+}
