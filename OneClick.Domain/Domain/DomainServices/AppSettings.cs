@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static OneClick.Domain.Enums.App.AppEnums;
+﻿using static OneClick.Domain.Enums.App.AppEnums;
 
 namespace OneClick.Domain.Domain.DomainServices
 {

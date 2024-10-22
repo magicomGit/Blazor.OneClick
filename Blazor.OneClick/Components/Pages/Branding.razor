@@ -3,33 +3,60 @@
 @using global::OneClick.UseCases.Intefaces.App
 
 @inject IAppSettingsRepository _settingsRepository
-@if (_isLoading)
-{
-    
-}
-else
-{
-    <EditForm Model="@_settings" OnValidSubmit="OnValidSubmit">
-        <MudItem xs="12" md="9">
-            <MudGrid>
-                <MudItem xs="12" lg="6">
-                    <MudTextField Label="Tel" Variant="Variant.Outlined" @bind-Value="_settings.SystemName" />
+
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    <MudText Typo="Typo.h5">Брендирование</MudText>
+    <MudDivider/>
+    @if (_isLoading)
+    {
+
+    }
+    else
+    {
+        <EditForm Model="@_settings" OnValidSubmit="OnValidSubmit">
+            <MudItem xs="12" md="9">
+                <MudGrid>
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Название системы" Variant="Variant.Outlined" @bind-Value="_settings.SystemName" />
+                    </MudItem>
+
+
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Домен" Variant="Variant.Outlined" @bind-Value="_settings.SystemDomain" />
+                    </MudItem>
+
+                </MudGrid>
+
+                <MudItem xs="12" md="4" >
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2 pa-0">
+                                <MudImage Src="@_defaultAvatar" Class="mx-auto" />
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
                 </MudItem>
-
-
-                <MudItem xs="12" lg="6">
-                    <MudTextField Label="Email" Variant="Variant.Outlined" @bind-Value="_settings.SystemDomain" />
+                <MudItem xs="12" md="4" >
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2 pa-0">
+                                <MudImage Src="@_systemLogo" Class="mx-auto" />
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
                 </MudItem>
+            </MudItem>
 
-            </MudGrid>
-        </MudItem>
+        </EditForm>
+    }
 
-    </EditForm>
-}
+</MudPaper>
 
 @code {
     private AppSettings? _settings { get; set; }
     private bool _isLoading { get; set; } = true;
+    private string _defaultAvatar { get; set; } 
+    private string _systemLogo { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -39,12 +66,19 @@ else
         }
 
         _settings = await _settingsRepository.GetAppSettings();
+        _defaultAvatar = await _settingsRepository.GetDefaultAvatar();
+        _systemLogo = await _settingsRepository.GetSystemLogo();
 
         _isLoading = false;
         StateHasChanged();
     }
 
     private void OnValidSubmit()
+    {
+
+    }
+
+    private async void UploadFiles(IBrowserFile file)
     {
 
     }

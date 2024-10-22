@@ -77,6 +77,32 @@ namespace OneClick.Data.Repositoties
         }
 
 
+        public async Task<string> GetDefaultAvatar()
+        {
+            var defaultAvatar = await  _context.Settings.Where(x => x.Name == SettingsNames.DefaultAvatar).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            if (!string.IsNullOrEmpty(defaultAvatar))
+            {
+                return defaultAvatar;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        
+        public async Task<string> GetSystemLogo()
+        {
+            var systemLogo = await  _context.Settings.Where(x => x.Name == SettingsNames.SystemLogo).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            if (!string.IsNullOrEmpty(systemLogo))
+            {
+                return systemLogo;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         //================= private methods ========================
         private static string GetPriceJson(ServicesPrice price)
         {
@@ -89,5 +115,6 @@ namespace OneClick.Data.Repositoties
             return JsonConvert.SerializeObject(price, Formatting.Indented);
         }
 
+        
     }
 }

@@ -6,5 +6,7 @@ namespace OneClick.UseCases.Intefaces.App
     {
         Task<ServicesPrice> GetServicesPrices();
         Task<AppSettings> GetAppSettings();
+        Task<string> GetDefaultAvatar();
+        Task<string> GetSystemLogo();
     }
 }
