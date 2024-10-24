@@ -6,7 +6,7 @@
 
 <MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
     <MudText Typo="Typo.h5">Брендирование</MudText>
-    <MudDivider/>
+    <MudDivider Class="my-4" />
     @if (_isLoading)
     {
 
@@ -20,32 +20,55 @@
                         <MudTextField Label="Название системы" Variant="Variant.Outlined" @bind-Value="_settings.SystemName" />
                     </MudItem>
 
-
                     <MudItem xs="12" lg="6">
                         <MudTextField Label="Домен" Variant="Variant.Outlined" @bind-Value="_settings.SystemDomain" />
                     </MudItem>
-
+                </MudGrid>
+                <MudGrid Justify="Justify.SpaceAround">
+                    <MudItem Class="d-flex justify-center" xs="12" md="4">
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="my-2 pa-0">
+                                    <MudImage Src="@_defaultAvatar" />
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+                    </MudItem>
+                    <MudItem Class="d-flex justify-center" xs="12" md="4">
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="my-2 pa-0 bg-n">
+                                    <MudImage Src="@_systemLogo" />
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+                    </MudItem>
                 </MudGrid>
 
-                <MudItem xs="12" md="4" >
-                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2 pa-0">
-                                <MudImage Src="@_defaultAvatar" Class="mx-auto" />
-                            </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-                </MudItem>
-                <MudItem xs="12" md="4" >
-                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2 pa-0">
-                                <MudImage Src="@_systemLogo" Class="mx-auto" />
-                            </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-                </MudItem>
+                <MudGrid>
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Телеграм  бот" Variant="Variant.Outlined" @bind-Value="_settings.TelegramBotName" />
+                    </MudItem>
+
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Ключ" Variant="Variant.Outlined" @bind-Value="_settings.TelegramBotKey" />
+                    </MudItem>
+                </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Сообщенеи Телеграм бота" Variant="Variant.Outlined" @bind-Value="_settings.GreetingMessage" Lines="6" />
+                    </MudItem>
+
+                    <MudItem xs="12" lg="6">
+                        <MudTextField Label="Напоминание для пользователя" Variant="Variant.Outlined" @bind-Value="_settings.Reminder" Lines="6" />
+                    </MudItem>
+                </MudGrid>
             </MudItem>
+
+            <MudDivider Class="my-4" />
+            <MudStack Row Justify="Justify.FlexStart" Wrap="Wrap.Wrap">
+                <MudButton FullWidth="false" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Сохранить </MudButton>
+            </MudStack>
 
         </EditForm>
     }
@@ -55,8 +78,8 @@
 @code {
     private AppSettings? _settings { get; set; }
     private bool _isLoading { get; set; } = true;
-    private string _defaultAvatar { get; set; } 
-    private string _systemLogo { get; set; }
+    private string? _defaultAvatar { get; set; }
+    private string? _systemLogo { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

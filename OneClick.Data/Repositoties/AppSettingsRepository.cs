@@ -103,6 +103,71 @@ namespace OneClick.Data.Repositoties
             }
         }
 
+        public async Task<string> GetAdminId()
+        {
+            var settingsAdminId = await _context.Settings.Where(x => x.Name == SettingsNames.AdminId).FirstOrDefaultAsync();
+            var adminId = string.Empty;
+            if (settingsAdminId != null)
+            {
+                adminId = settingsAdminId.JsonObject;
+                if (adminId == "")
+                {
+                    var admin = await _context.Users.Where(x => x.UserName == "admin").FirstOrDefaultAsync();
+                    if (admin != null)
+                    {
+                        settingsAdminId.JsonObject = admin.Id;
+                        _context.Update(settingsAdminId);
+                        await _context.SaveChangesAsync();
+
+                        adminId = admin.Id;
+                    }
+                }
+            }
+            else
+            {
+                var admin = await _context.Users.Where(x => x.UserName == "admin").FirstOrDefaultAsync();
+                if (admin != null)
+                {
+                    await _context.Settings.AddAsync(new SystemSettings { Name = SettingsNames.AdminId, JsonObject = admin.Id });
+                    adminId = admin.Id;
+                }
+                else
+                {
+                    await _context.Settings.AddAsync(new SystemSettings { Name = SettingsNames.AdminId, JsonObject = "" });
+                }
+                await _context.SaveChangesAsync();
+            }
+            return adminId;
+        }
+
+        public async Task<BillingSettings> GetBillingSettings()
+        {
+            var billingSettingsJson =await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
+
+            if (billingSettingsJson == null)
+            {
+                await _context.Settings.AddAsync(new SystemSettings
+                { Name = SettingsNames.BillingSettings, JsonObject = GetBillingSettingsJson(new BillingSettings()) });
+                await _context.SaveChangesAsync();
+
+                billingSettingsJson =await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
+                //log
+            }
+
+            var billingSettings = new BillingSettings();
+
+            try
+            {
+                billingSettings = JsonConvert.DeserializeObject<BillingSettings>(billingSettingsJson);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return billingSettings;
+        }
+
         //================= private methods ========================
         private static string GetPriceJson(ServicesPrice price)
         {
@@ -111,10 +176,14 @@ namespace OneClick.Data.Repositoties
 
         public static string GetAppSettingsJson(AppSettings price)
         {
-
             return JsonConvert.SerializeObject(price, Formatting.Indented);
         }
 
-        
+        public static string GetBillingSettingsJson(BillingSettings obj)
+        {
+            return JsonConvert.SerializeObject(obj, Formatting.Indented);
+        }
+
+
     }
 }

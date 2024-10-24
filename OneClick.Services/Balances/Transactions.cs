@@ -96,7 +96,7 @@ namespace OneClick.Services.Balances
 
                 var implementerName = "";
 
-                if (transaction.PaySystem == PaymentSystem.Admin)
+                if (transaction.PaySystem == PaymentSystem.PaymentViaAdmin)
                 {
                     var implementer = await _userRepository.GetByIdAsync(implementerId.ToString()); 
                     implementerId = new Guid(implementer.Id);

@@ -32,6 +32,6 @@
        var  AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUserId = UserManager.GetUserId(AuthState.User);
 
-        var result = await _transactions.ApplyDeposit(new Guid(currentUserId), PaymentSystem.Admin, 9, "test transaction");
+        var result = await _transactions.ApplyDeposit(new Guid(currentUserId), PaymentSystem.PaymentViaAdmin, 9, "test transaction");
     }
 }

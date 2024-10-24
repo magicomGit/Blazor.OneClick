@@ -47,7 +47,7 @@
     public enum PaymentSystem
     {
         None,
-        Admin,
+        PaymentViaAdmin,
         Cryptomus,
 
 

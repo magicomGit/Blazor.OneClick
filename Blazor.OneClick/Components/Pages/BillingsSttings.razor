@@ -1,0 +1,153 @@
+﻿@page "/billingsettings"
+@using global::OneClick.Domain.Domain.DomainServices
+@using global::OneClick.Domain.Enums.Transaction
+@using global::OneClick.UseCases.Intefaces.App
+
+@inject IAppSettingsRepository _settingsRepository
+
+<PageTitle> Настройки биллинг| CopyTrader</PageTitle>
+
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    <MudText Typo="Typo.h5">Настройки биллинг</MudText>
+    <MudDivider Class="my-4" />
+    @if (_isLoading)
+    {
+
+    }
+    else
+    {
+        <MudItem xs="12" md="9">
+
+            <MudText Typo="Typo.body2"><b>Владелец счета One Click</b></MudText>
+            <MudTextField Label="Id администратора" Variant="Variant.Outlined" @bind-Value="_adminId" />
+
+        </MudItem>
+        <MudDivider Class="my-4" />
+
+        <MudItem xs="12" md="9">
+            <MudText Typo="Typo.body2"><b>Выбор способа оплаты</b></MudText>
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudItem xs="12" md="6">
+                    <MudSelect @bind-Value="_billingSettings.DefaultPayment" Variant="Variant.Outlined" T="PaymentSystem" SelectedValuesChanged="@PayChanged">
+                        @foreach (PaymentSystem item in Enum.GetValues(typeof(PaymentSystem)))
+                        {
+                            if (item == PaymentSystem.None)
+                            {
+                                continue;
+                            }
+                            if (_billingSettings?.DefaultPayment == item)
+                            {
+
+                                <MudSelectItem Value="@item">@item</MudSelectItem>
+                            }
+                            else
+                            {
+
+                                <MudSelectItem Value="@item">@item</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    @if (_billingSettings?.DefaultPayment == PaymentSystem.PaymentViaAdmin)
+                    {                       
+                        <MudSwitch @bind-Value="AdminPaySwitch" ThumbIcon="@(AdminPaySwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                                   ThumbIconColor="@(AdminPaySwitch ? Color.Success : Color.Error)" Size="Size.Large">Admin Pay</MudSwitch>
+
+                    }
+                    @if (_billingSettings?.DefaultPayment == PaymentSystem.Cryptomus)
+                    {
+                        <MudSwitch @bind-Value="CryptomusSwitch" ThumbIcon="@(CryptomusSwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                                   ThumbIconColor="@(CryptomusSwitch ? Color.Success : Color.Error)" Size="Size.Large">Cryptomus</MudSwitch>
+                       
+                    }
+                    
+                </MudItem>
+            </MudStack>
+            
+           
+        </MudItem>
+        <MudItem xs="12" md="9" Class="mt-4">
+        @if (_billingSettings?.DefaultPayment == PaymentSystem.PaymentViaAdmin)
+        {
+            <MudStack Row>
+                <MudItem xs="12" md="6">
+                        <MudSelect Label="Network" Text="ert" T="string" Value="@("Thron")" Variant="Variant.Outlined">
+
+                        </MudSelect>
+                </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Variant="Variant.Outlined" Label="Wallet address" @bind-Value="_billingSettings.WalletAddress" />
+                    </MudItem>
+            </MudStack>
+           
+        }
+         @if (_billingSettings?.DefaultPayment == PaymentSystem.Cryptomus)
+        {
+                <MudStack Row >
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Merchant Id" @bind-Value="_billingSettings.CryptomusMerchantId" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Api key" @bind-Value="_billingSettings.CryptomusApiKey" />
+                    </MudItem>
+                   
+                </MudStack>
+                <MudStack Row>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Callback Url" @bind-Value="_billingSettings.CryptomusCallbackUrl" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Redirect Url" @bind-Value="_billingSettings.CryptomusRedirectUrl" />
+                    </MudItem>
+                </MudStack>
+
+        }
+        </MudItem>
+        <MudDivider Class="my-4" />
+    }
+</MudPaper>
+
+@code {
+    private BillingSettings? _billingSettings { get; set; }
+    private bool _isLoading { get; set; } = true;
+    private string? _adminId { get; set; }
+    private bool AdminPaySwitch { get; set; }
+    private bool CryptomusSwitch { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _billingSettings = await _settingsRepository.GetBillingSettings();
+        _adminId = await _settingsRepository.GetAdminId();
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void PayChanged()
+    {
+        //string val = (string)((ChangeEventArgs)args).Value;
+
+        // switch (val)
+        // {
+        //     case "AdminPayment":
+        //         Input.DefaultPayment = Payments.AdminPayment;
+        //         StateHasChanged();
+        //         break;
+        //     case "Cryptomus":
+        //         Input.DefaultPayment = Payments.Cryptomus;
+        //         StateHasChanged();
+        //         break;
+        //     default:
+        //         break;
+        // }
+
+
+    }
+}
