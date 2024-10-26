@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneClick.Data.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+    public class PostgreDbContext(DbContextOptions<PostgreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Project>? Projects { get; set; }
         public DbSet<ProjectData>? ProjectsData { get; set; }

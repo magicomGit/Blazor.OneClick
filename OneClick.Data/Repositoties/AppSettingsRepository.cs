@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using OneClick.Data.Constants;
 using OneClick.Data.Data;
 using OneClick.Domain.Domain.DomainModels;
 using OneClick.UseCases.Intefaces.App;
@@ -86,7 +87,7 @@ namespace OneClick.Data.Repositoties
             }
             else
             {
-                return "";
+                return DefaultAvatar.Content;
             }
         }
         
@@ -99,7 +100,7 @@ namespace OneClick.Data.Repositoties
             }
             else
             {
-                return "";
+                return SystemLogo.Content;
             }
         }
 

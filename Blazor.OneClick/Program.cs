@@ -41,8 +41,13 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseLazyLoadingProxies()
-    .UseNpgsql(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
-    //.UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+    .UseNpgsql(Settings.ConnectionStringPostgre, b => b.MigrationsAssembly("Blazor.OneClick")));
+//.UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+
+builder.Services.AddDbContext<PostgreDbContext>(options =>
+    options.UseLazyLoadingProxies()
+    .UseNpgsql(Settings.ConnectionStringPostgre, b => b.MigrationsAssembly("Blazor.OneClick")));
+//.UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
 
 
 

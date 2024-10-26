@@ -1,0 +1,30 @@
+﻿
+<MudDialog>
+    <DialogContent>
+
+
+
+        <div class="text-center fs-6 my-3">
+            Для завершения регистрации перейдите в телеграм бот, нажмите кнопку  <strong>запустить</strong> .
+            Ваш телеграм аккаунт будет привязан к вашему аккаунту в системе <strong>CopyTrading</strong> .
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-center  w-100"> <MudLink Class="btn-cust  my-2 text-decoration-none" Style="padding:6px 16px" Href="@url" Target="_blank">Подключить Telegram</MudLink></div>
+
+
+    </DialogContent>
+    <DialogActions>
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string? url { get; set; }
+
+
+
+    void Cancel() => MudDialog.Cancel();
+
+
+}

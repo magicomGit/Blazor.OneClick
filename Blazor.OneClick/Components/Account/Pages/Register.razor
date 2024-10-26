@@ -3,104 +3,387 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
+@using Blazor.OneClick.Components.Pages.Shared.Modals
+@using Blazor.OneClick.Constants
+@using Blazor.OneClick.TelegramBot
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
 
+@using Telegram.Bot
+@using global::OneClick.Data.Constants
 @using global::OneClick.Data.Data
+@using global::OneClick.UseCases.Intefaces.App
+@using static global::OneClick.Domain.Enums.App.AppEnums
 
+@implements IDisposable
+@inject IJSRuntime JSRuntime;
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
+
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register</PageTitle>
+@inject ITelegramBotClient telegramClient
+@inject TelegramBotEngine telegramEngine
 
-<h1>Register</h1>
+@inject ApplicationDbContext _context
+@inject RoleManager<IdentityRole> RoleManager
+@inject ProtectedLocalStorage LocalStorage
+@inject IDialogService DialogService
+@inject IAppSettingsRepository _settingsRepository
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+ @rendermode InteractiveServer
+
+
+<style>
+    .mud-icon-button {
+        padding: 5px;
+    }
+
+    .mud-dialog-actions {
+        justify-content: center !important;
+        margin-bottom: 20px;
+    }
+
+    .mud-dialog-container {
+        min-width: 370px !important;
+    }
+
+    .tel-link {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+</style>
+
+<PageTitle>Регистрация | CopyTrader</PageTitle>
+
+
+<div class="row justify-content-center align-content-center  h-100">
+    <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8 border rounded-4 row justify-content-center bg-white" style="max-width:480px; min-width:380px;">
+        <img class=" my-4" style="width: 100px" src="images/logo.png" />
+        <h1 class="text-center">Регистрация2</h1>
+
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
+           
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
+
+
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email">Email</label>
+                <label for="email">Логин</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
+                <label for="password">Пароль</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
+                <label for="confirm-password">Подтверждение пароля</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <div class="form-floating mb-3">
+                <input type="text"  class="form-control" value="@Input.Telegram" autocomplete="telegram" aria-required="true" placeholder="telegram" />
+                <label for="confirm-password">Телеграм</label>
+                <ValidationMessage For="() => Input.Telegram" class="text-danger" />
+            </div>
+
+
+            <MudButton ButtonType="ButtonType.Button" Size="Size.Large" Class="btn-cust w-100 my-2" Color="telegramButtonColor" Variant="Variant.Filled" Disabled="telegramButtonDisabled" @onclick="TelegramDialog">Подключить Telegram</MudButton>
+            <MudButton ButtonType="ButtonType.Button" OnClick="RegisterUser2" Size="Size.Large" Class="btn-cust w-100 my-2" Color="registerButtonColor"
+                       Variant="Variant.Filled">Зарегистрироваться</MudButton>
+
+            <div class="text-center my-5">
+                <p>
+                    У вас уже есть аккаунт?
+                    <MudLink Color="Color.Info" Href="Account/Login">Войти</MudLink>
+                </p>
+
+            </div>
         </EditForm>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
     </div>
 </div>
 
+<MudDialogProvider FullWidth="true" Position="DialogPosition.Center"
+                   MaxWidth="MaxWidth.Small" />
+
+
+<MudMessageBox @ref="ConfirmServerAction" Title="Привязка телеграм аккаунта">
+    <MessageContent>
+        <div class="text-center fs-6 my-3">
+            Для завершения регистрации перейдите в телеграм бот, нажмите кнопку  <strong>запустить</strong> .
+            Ваш телеграм аккаунт будет привязан к вашему аккаунту в системе <strong>CopyTrading</strong> .
+        </div>
+
+    </MessageContent>
+    <YesButton>
+        <div class="d-inline-block"> <MudLink Class="btn-cust w-100 my-2 text-decoration-none" Style="padding:6px 16px" Href="@BotUrl" Target="_blank">Подключить Telegram</MudLink></div>
+
+    </YesButton>
+    <CancelButton>
+
+    </CancelButton>
+</MudMessageBox>
+
 @code {
+    MudMessageBox? ConfirmServerAction { get; set; }
     private IEnumerable<IdentityError>? identityErrors;
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    //private CustomMessage Message = new CustomMessage();
+    private bool registerButtonDisabled { get; set; } = true;
+    private bool telegramButtonDisabled { get; set; }
+    private Color registerButtonColor = Color.Default;
+    private Color telegramButtonColor = Color.Info;
+    private string? ConfirmContent { get; set; }
+    private string? BotUrl { get; set; }
+
+    public delegate Telegram.Bot.Types.Update NewMessageReceiveDelegate(Telegram.Bot.Types.Update update);
+    public event NewMessageReceiveDelegate MessageReceiveEvent;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string? referalcode { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private IDialogReference? Dialog { get; set; }
+
+    private Guid TelegramRequestId = Guid.NewGuid();
+    public bool TelegramIsConfirmed { get; set; }
+
+    //-----------------------------------------
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        TelegramBotHelper.OnMessageEvent += OnMessageReceive;
+
+    }
+
+    private void OnMessageReceive(Telegram.Bot.Types.Update update)
+    {
+        var messageChunks = update.Message.Text.Split(' ');
+        var telegramId = update.Message.From.Id;
+        var telegram = update.Message.From.Username;
+
+        if (messageChunks.Length < 2)
+        {
+            return;
+        }
+
+        if (TelegramRequestId.ToString() == messageChunks[1] && !TelegramIsConfirmed)
+        {
+            if (_context.Users.Where(x => x.Telegram == telegram).Any())
+            {
+
+                telegramClient.SendTextMessageAsync(telegramId, "Телеграм " + telegram + " уже используется другим пользователем. ");
+            }
+            else
+            {
+                TelegramIsConfirmed = true;
+                registerButtonColor = Color.Info;
+                registerButtonDisabled = false;
+                telegramButtonColor = Color.Default;
+                telegramButtonDisabled = true;
+
+                Input.Telegram = telegram;
+                Input.TelegramId = telegramId;
+                telegramClient.SendTextMessageAsync(telegramId, "Ваш телеграм аккаунт подтвержден. Вернитесь на страницу регистрации и завершите процедуру.");
+            }
+
+            if (Dialog != null)
+            {
+                InvokeAsync(Dialog.Close);
+            }
+
+            InvokeAsync(StateHasChanged);
+
+        }
+
+    }
+
+
+
+    private async Task TelegramDialog()
+    {
+        if (!TelegramIsConfirmed)
+        {
+            var appSettings = await _settingsRepository.GetAppSettings();
+
+            BotUrl = "https://t.me/" + appSettings.TelegramBotName + "?start=" + TelegramRequestId;
+
+            var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+            var parameters = new DialogParameters<InfoModal>();
+            parameters.Add(x => x.url, BotUrl);
+
+            Dialog = await DialogService.ShowAsync<InfoModal>("Привязка телеграм аккаунта", parameters, options);
+        }
+
+    }
+
+
+
+
+    #region Telegram
+
+
+    #endregion
 
     public async Task RegisterUser(EditContext editContext)
     {
+        
+    }
+    public async Task RegisterUser2()
+    {
+
+
         var user = CreateUser();
 
+        if (_context.Users.Where(x => x.Telegram == Input.Telegram).Any())
+        {
+
+            IEnumerable<IdentityError> errors = new List<IdentityError> { new IdentityError { Code = "102", Description = "Telegram " + Input.Telegram + " уже занят! " } };
+
+            //Message = new CustomMessage(Severity.Error, "Telegram " + Input.Telegram + " уже занят! ");
+            return;
+        }
+
+        user.Telegram = Input.Telegram;
+        user.TelegramId = Input.TelegramId;
+        user.Registered = DateTime.UtcNow;
+        user.Status = UserStatus.Active;
+        user.Balance = new Balance();
+        user.PaymentInfo = new();
+        user.Alerts = new List<Alert>();
+
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        //var emailStore = GetEmailStore();
+        //await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
         {
-            identityErrors = result.Errors;
+            var errorStr = "";
+            foreach (var item in result.Errors)
+            {
+                errorStr += item.Description + "/";
+            }
+
+            //Message = new CustomMessage(Severity.Error, errorStr);
+
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        var roles = RoleManager.Roles.ToList();
+        if (roles.Count == 0)
         {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            foreach (var role in Settings.Roles)
+            {
+                await RoleManager.CreateAsync(new IdentityRole(role));
+            }
+
         }
 
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        if (user.UserName == "admin")
+        {
+            var res = await UserManager.AddToRoleAsync(user, Settings.AdminRole);
+            if (!res.Succeeded)
+            {
+                identityErrors = res.Errors;
+            }
+            var defaultAvatar = await _settingsRepository.GetDefaultAvatar();
+            var avatar = new SystemSettings { Name = SettingsNames.DefaultAvatar, JsonObject = defaultAvatar };
+            var logo = new SystemSettings { Name = SettingsNames.SystemLogo, JsonObject = SystemLogo.Content };
+            _context.Add(avatar);
+            _context.Add(logo);
+            _context.SaveChanges();
+        }
+        else
+        {
+            var res = await UserManager.AddToRoleAsync(user, Settings.UserRole);
+            if (!res.Succeeded)
+            {
+                identityErrors = res.Errors;
+            }
+        }
+
+        var codeOne = await LocalStorage.GetAsync<string>("codeone");
+
+        if (codeOne.Success)
+        {
+            long refCode = 0;
+
+            long.TryParse(codeOne.Value, out refCode);
+
+            if (refCode != null)
+            {
+                var referalParentId = _context.Users.Where(x => x.Balance.Id == refCode).Select(s => s.Id).FirstOrDefault();
+                if (referalParentId != null && referalParentId != user.Id)
+                {
+                    var hasParent = _context.Referrals.Where(x => x.UserId == referalParentId).Any();
+                    var referralItem = new Referral { ParentId = referalParentId, UserId = user.Id, Level = hasParent ? 2 : 1 };
+                    _context.Add(referralItem);
+                    _context.SaveChanges();
+                }
+            }
+
+
+
+        }
+        else
+        {
+            var adminId = _context.Users.Where(x => x.UserName == "admin").Select(s => s.Id).FirstOrDefault();
+            if (adminId != null)
+            {
+                var referralItem = new Referral { Level = 0, UserId = user.Id, ParentId = adminId };
+                _context.Add(referralItem);
+                _context.SaveChanges();
+            }
+        }
+        //---- регистрация пользователей телеграм бота
+        if (!await _context.TelegramUsers.Where(x => x.TelegramId == user.TelegramId).AnyAsync())
+        {
+            await _context.TelegramUsers.AddAsync(new TelegramUser
+                {
+                    Name = user.Telegram ?? string.Empty,
+                    TelegramId = user.TelegramId,
+                    Registered = DateTime.UtcNow,
+                    RegisteredInOneClick = DateTime.UtcNow
+                });
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            var telegramUser = await _context.TelegramUsers.Where(x => x.TelegramId == user.TelegramId).FirstOrDefaultAsync();
+            if (telegramUser != null)
+            {
+                telegramUser.RegisteredInOneClick = DateTime.UtcNow;
+                telegramUser.OneClickLogin = user.UserName;
+                telegramUser.OneClickUserId = user.Id;
+                _context.TelegramUsers.Update(telegramUser);
+                await _context.SaveChangesAsync();
+            }
+        }
+        //----
+
+
+        telegramClient.SendTextMessageAsync(user.TelegramId, "Вы успешно зарегистрированы в системе CopyTrading");
+
+        NavigationManager.NavigateTo("/", true);
+
     }
 
     private ApplicationUser CreateUser()
@@ -116,31 +399,37 @@
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<ApplicationUser>)UserStore;
-    }
+
+
 
     private sealed class InputModel
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Поле логин обязательно для заполнения")]
+        [RegularExpression(@"^[a-zA-Z]{1}[a-zA-Z0-9]{4,50}$",
+         ErrorMessage = "Логин должен содержать не менее 5 символов, только латиницу и цифры")]
+        [Display(Name = "Login")]
         public string Email { get; set; } = "";
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Поле пароль обязательно для заполнения")]
+        [RegularExpression(@"^[a-zA-Z0-9]{5,50}$",
+         ErrorMessage = "Пароль должен содержать не менее 5 символов, только латиницу и цифры")]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "Новый пароль и подтверждение пароля не совпадают.")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Required]
+        public string Telegram { get; set; } = "";
+        [Required]
+        public long TelegramId { get; set; }
+    }
+
+
+    public void Dispose()
+    {
+        TelegramBotHelper.OnMessageEvent -= OnMessageReceive;
     }
 }
