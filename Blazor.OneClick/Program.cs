@@ -41,7 +41,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseLazyLoadingProxies()
-    .UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+    .UseNpgsql(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+    //.UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
 
 
 

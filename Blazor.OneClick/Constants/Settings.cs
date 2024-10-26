@@ -4,7 +4,8 @@ namespace Blazor.OneClick.Constants
 {
     public static class Settings
     {
-        public static string ConnectionString = "Server=" + Environment.MachineName + "\\SQLEXPRESS;Database=OneClickWeb;User Id=monster;Password=qwerty111222333;Trusted_Connection=yes;TrustServerCertificate=True;";
+        //public static string ConnectionString = "Server=" + Environment.MachineName + "\\SQLEXPRESS;Database=OneClickWeb;User Id=monster;Password=qwerty111222333;Trusted_Connection=yes;TrustServerCertificate=True;";
+        public static string ConnectionString = "Host=localhost;Port=5432;Database=OneClickWeb;Username=magicom;Password=Guj7u";
         // public static string ConnectionString = "server=VDSWIN2K22\\SQLEXPRESS;Database=OneClickWeb;User Id=monster;Password=qwerty111222333;Trusted_Connection=no;TrustServerCertificate=True;";
         // public static string ConnectionString = "server=localhost;user=root;password=Guj7uGuj7u;database=OneClickWeb;";
         public static readonly CultureInfo[] SupportedCultures =
