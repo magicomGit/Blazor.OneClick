@@ -1,19 +1,17 @@
 ﻿using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
+using OneClick.Domain.Enums.Project;
 
 namespace OneClick.Domain.Domain.OneClickProjects
 {
     public class CopyTradingProject
     {
-        public int Id { get; set; }
-        public Guid OwnerId { get; set; }
-        public string? OwnerName { get; set; }
+        public int Id { get; set; }       
+        public Owner Owner { get; }
+        public ServerInfo Server { get; }
         public string? ProjectDomain { get; set; }
-        public TelegramBot TelegramBot { get; }
-        public string? TelegramKey { get; set; }
+        public TelegramBot TelegramBot { get; }        
         public string? ProjectName { get; set; }
-        public string? ServerIP { get; set; }
-        public string? ServerName { get; set; }
-        public int ServerId { get; set; }
+       
         public int ProxyCount { get; set; }
         public int TraderMaxCount { get; set; }
 
@@ -25,9 +23,8 @@ namespace OneClick.Domain.Domain.OneClickProjects
         public ProjectState State { get; set; }
 
         public List<ExchangeMarket> Exchanges { get; set; }
-
-        public bool BillingEnabled { get; set; }
-        public bool CrossTradingEnabled { get; set; }
+        public OtherSettingsValues OtherSettings { get; }
+       
         public bool Synchronized { get; set; }
         public ProjectPayment? Payment { get; set; }
         public string? Logo { get; set; }
@@ -45,20 +42,20 @@ namespace OneClick.Domain.Domain.OneClickProjects
         {
 
         }
-        public CopyTradingProject(int id, Guid ownerId, string ownerName, string projectDomain, TelegramBot telegramBot, string projectName,
+        public CopyTradingProject(int id, string projectDomain, TelegramBot telegramBot, string projectName,
             string serverIP, string serverName, int serverId, int proxyCount, int traderMaxCount, int userMaxCount, int traderCount, int userCount,
             DateTime createDate, DateTime lastPing, ProjectState state, List<ExchangeMarket> exchanges, ProjectPayment payment, string logo,
-            ProjectTariff tariff, string defaultLanguage, List<Language> languages, double dayFee, string adminTelegram, long adminTelegramId)
+            ProjectTariff tariff, string defaultLanguage, List<Language> languages, double dayFee, string adminTelegram, long adminTelegramId,
+            OtherSettingsValues otherSettings, Owner owner, ServerInfo server)
         {
             Id = id;
-            OwnerId = ownerId;
-            OwnerName = ownerName;
+            Owner = owner;
+            
             ProjectDomain = projectDomain;
             TelegramBot = telegramBot;
             ProjectName = projectName;
-            ServerIP = serverIP;
-            ServerName = serverName;
-            ServerId = serverId;
+            Server = server;
+           
             ProxyCount = proxyCount;
             UserMaxCount = userMaxCount;
             TraderMaxCount = traderMaxCount;
@@ -76,69 +73,11 @@ namespace OneClick.Domain.Domain.OneClickProjects
             DayFee = dayFee;
             AdminTelegram = adminTelegram;
             AdminTelegramId = adminTelegramId;
+            OtherSettings = otherSettings;
         }
 
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public enum ProjectTariff
-    {
-        Start = 1,
-        Company = 2,
-
-    }
-
-    public enum ProjectState
-    {
-        NewProjectRequest,
-        Creating,
-        CreatingFailure,
-        Ready,
-        Deleted,
-        Frozen,
-        DeleteProjectRequest,
-        DeletingFailure,
-        FrozenByAdmin,
-        ChangeStateProcess,
-        ChangeStateError,
-        SourceRelocateRequest,
-        DestinationRelocateRequest,
-        RelocateSucceed,
-        FrozenByOwner,
-        FullDeleteProjectRequest
-    }
-
-    public enum ExchangeMarket
-    {
-        None = 0,
-        Binance = 10,
-        BingX = 90,
-        Bitget = 80,
-        Bybit = 20,
-        
-        
-        
-        Kucoin = 60,
-        Okex = 70,
-    }
+    
 }

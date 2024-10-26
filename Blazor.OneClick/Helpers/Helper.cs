@@ -1,10 +1,17 @@
 ﻿using Blazor.OneClick.Constants;
 using Microsoft.AspNetCore.Components.Authorization;
+using Newtonsoft.Json;
 
 namespace Blazor.OneClick.Helpers
 {
     public static class Helper
     {
+        public static T GetDeepClone<T>(this T obj)
+        {
+            var json = JsonConvert.SerializeObject(obj);
+            return JsonConvert.DeserializeObject<T>(json);
+        }
+
         public static DateTime UtcToLocalTime(DateTime utcTime)
         {
             TimeZoneInfo localZone = TimeZoneInfo.Local;
@@ -60,6 +67,15 @@ namespace Blazor.OneClick.Helpers
                 return true;
             }
             return false;
+        }
+
+        public static byte[] GetBytes(Stream stream)
+        {
+            var bytes = new byte[stream.Length];
+            stream.Seek(0, SeekOrigin.Begin);
+            stream.ReadAsync(bytes, 0, bytes.Length);
+            stream.Dispose();
+            return bytes;
         }
 
     }

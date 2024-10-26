@@ -1,5 +1,6 @@
 ﻿using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Domain.OneClickProjects;
+using OneClick.Domain.Enums.Project;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
 

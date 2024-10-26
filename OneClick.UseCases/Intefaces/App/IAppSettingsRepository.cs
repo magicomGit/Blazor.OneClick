@@ -10,5 +10,11 @@ namespace OneClick.UseCases.Intefaces.App
         Task<string> GetDefaultAvatar();
         Task<string> GetSystemLogo();
         Task<string> GetAdminId();
+
+        Task<bool> SaveBillingSettings(BillingSettings settings);
+        Task<bool> SaveAppSettings(AppSettings settings);
+        Task<bool> SaveServicesPrices(ServicesPrice settings);
+        Task<bool> SaveAvatar(string settings);
+        Task<bool> SaveSystemLogo(string settings);
     }
 }

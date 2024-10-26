@@ -3,6 +3,7 @@
 @using Blazor.OneClick.Helpers
 @using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json
+@using System.Text.RegularExpressions
 @using global::OneClick.Domain.Domain.DomainModels
 @using global::OneClick.Domain.Enums.Transaction
 @using global::OneClick.UseCases.Intefaces.App
@@ -10,6 +11,7 @@
 @attribute [Authorize(Roles = Settings.AdminRole)]
 @inject IAppSettingsRepository _settingsRepository
 @inject AuthenticationStateProvider _authenticationStateProvider
+@inject ISnackbar _snackbar
 
 <PageTitle> Настройки биллинг| CopyTrader</PageTitle>
 
@@ -34,7 +36,7 @@
             <MudText Typo="Typo.body2"><b>Выбор способа оплаты</b></MudText>
             <MudStack Row Wrap="Wrap.Wrap" Spacing="6" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
                 <MudItem xs="12" md="6">
-                    <MudSelect @bind-Value="_billingSettings.DefaultPayment" Variant="Variant.Outlined" T="PaymentSystem" SelectedValuesChanged="@PayChanged">
+                    <MudSelect @bind-Value="_billingSettings.DefaultPayment"  Variant="Variant.Outlined" T="PaymentSystem" >
                         @foreach (PaymentSystem item in Enum.GetValues(typeof(PaymentSystem)))
                         {
                             if (item == PaymentSystem.None)
@@ -43,12 +45,10 @@
                             }
                             if (_billingSettings?.DefaultPayment == item)
                             {
-
-                                <MudSelectItem Value="@item">@item</MudSelectItem>
+                                <MudSelectItem  Value="@item">@item</MudSelectItem>
                             }
                             else
                             {
-
                                 <MudSelectItem Value="@item">@item</MudSelectItem>
                             }
                         }
@@ -78,7 +78,7 @@
             {
                 <MudGrid >
                     <MudItem xs="12" md="6">
-                        <MudSelect Label="Network" @bind-Value="_billingSettings.Network" T="string" Variant="Variant.Outlined">
+                        <MudSelect Disabled="!_isAdminLogin" Label="Network" @bind-Value="_billingSettings.Network" T="string" Variant="Variant.Outlined">
                             @foreach (var item in _networks)
                             {
                                 <MudSelectItem Value="@item.Name">@item.Name</MudSelectItem>
@@ -95,20 +95,20 @@
             {
                 <MudGrid >
                     <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Merchant Id" @bind-Value="_billingSettings.CryptomusMerchantId" />
+                        <MudTextField Disabled="!_isAdminLogin" Variant="Variant.Outlined" Label="Merchant Id" @bind-Value="_billingSettings.CryptomusMerchantId" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Api key" @bind-Value="_billingSettings.CryptomusApiKey" />
+                        <MudTextField Disabled="!_isAdminLogin" Variant="Variant.Outlined" Label="Api key" @bind-Value="_billingSettings.CryptomusApiKey" />
                     </MudItem>
 
                 </MudGrid>
                 <MudGrid>
 
                     <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Callback Url" @bind-Value="_billingSettings.CryptomusCallbackUrl" />
+                        <MudTextField Disabled="!_isAdminLogin" Variant="Variant.Outlined" Label="Callback Url" @bind-Value="_billingSettings.CryptomusCallbackUrl" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Redirect Url" @bind-Value="_billingSettings.CryptomusRedirectUrl" />
+                        <MudTextField Disabled="!_isAdminLogin" Variant="Variant.Outlined" Label="Redirect Url" @bind-Value="_billingSettings.CryptomusRedirectUrl" />
                     </MudItem>
                 </MudGrid>
 
@@ -146,6 +146,12 @@
                 </MudItem>
             </MudGrid>
         </MudItem>
+
+        <MudDivider Class="my-4" />
+
+        <MudStack Row Justify="Justify.FlexStart" Wrap="Wrap.Wrap">
+            <MudButton FullWidth="false" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="SaveSettings" Color="Color.Primary">Сохранить </MudButton>
+        </MudStack>
     }
 </MudPaper>
 
@@ -174,28 +180,62 @@
         _billingSettings = await _settingsRepository.GetBillingSettings();
         _adminId = await _settingsRepository.GetAdminId();
 
+        if (_billingSettings.SelectedPayments.Contains(PaymentSystem.PaymentViaAdmin))
+        {
+            _adminPaySwitch = true;
+        }
+        if (_billingSettings.SelectedPayments.Contains(PaymentSystem.Cryptomus))
+        {
+            _cryptomusSwitch = true;
+        }
+
         _isLoading = false;
         StateHasChanged();
     }
 
-    private void PayChanged()
+    private async void SaveSettings()
     {
-        //string val = (string)((ChangeEventArgs)args).Value;
+        
+        _snackbar.Clear();
+        _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
 
-        // switch (val)
-        // {
-        //     case "AdminPayment":
-        //         Input.DefaultPayment = Payments.AdminPayment;
-        //         StateHasChanged();
-        //         break;
-        //     case "Cryptomus":
-        //         Input.DefaultPayment = Payments.Cryptomus;
-        //         StateHasChanged();
-        //         break;
-        //     default:
-        //         break;
-        // }
+        _billingSettings.SelectedPayments.Clear();
 
+        if (_adminPaySwitch)
+        {
+            if (_billingSettings.Network == null)
+            {
+                _billingSettings.Network = _networks[0].Name;
+            }
+            var selectedNetwork = _networks.Where(x => x.Name == _billingSettings.Network).FirstOrDefault();
 
+            var res = Regex.Match(_billingSettings.WalletAddress, selectedNetwork.AddressRegex);
+            if (!res.Success)
+            {
+                //Message = new CustomMessage(Severity.Error, "Адрес кошелька не соответствует выбранной сети");
+                _snackbar.Add("Адрес кошелька не соответствует выбранной сети", Severity.Error);
+                return;
+            }
+            _billingSettings.SelectedPayments.Add(PaymentSystem.PaymentViaAdmin);
+
+        }
+
+        if (_cryptomusSwitch)
+        {
+            _billingSettings.SelectedPayments.Add(PaymentSystem.Cryptomus);
+        }
+
+        var saveResult = await _settingsRepository.SaveBillingSettings(_billingSettings);
+       
+        if (saveResult)
+        {
+            _snackbar.Add("Изменения сохранены", Severity.Success);
+        }
+        else
+        {
+            _snackbar.Add("Save settings error", Severity.Error);
+        }
     }
+
+
 }

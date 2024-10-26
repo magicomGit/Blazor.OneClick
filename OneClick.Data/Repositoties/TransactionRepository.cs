@@ -2,7 +2,7 @@
 using OneClick.Data.Data;
 using OneClick.Data.Dto;
 using OneClick.Domain.Domain.Balances;
-using OneClick.Services.Contracts;
+using OneClick.Domain.Domain.DomainModels;
 using OneClick.UseCases.Intefaces.Balances;
 
 namespace OneClick.Data.Repositoties
@@ -68,7 +68,7 @@ namespace OneClick.Data.Repositoties
                 return response;
             }
 
-            
+
         }
 
         public async Task<Response<OneClickTransaction>> Update(OneClickTransaction transaction)

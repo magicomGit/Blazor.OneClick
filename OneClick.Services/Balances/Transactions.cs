@@ -1,4 +1,5 @@
 ﻿using OneClick.Domain.Domain.Balances;
+using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Enums.Transaction;
 using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.App;

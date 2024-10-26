@@ -1,8 +1,10 @@
 ﻿@page "/branding"
+@using Blazor.OneClick.Helpers
 @using global::OneClick.Domain.Domain.DomainModels
 @using global::OneClick.UseCases.Intefaces.App
 
 @inject IAppSettingsRepository _settingsRepository
+@inject ISnackbar _snackbar
 
 <MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
     <MudText Typo="Typo.h5">Брендирование</MudText>
@@ -35,7 +37,7 @@
                         </MudFileUpload>
                     </MudItem>
                     <MudItem Class="d-flex justify-center" xs="12" md="4">
-                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadLogo">
                             <ActivatorContent>
                                 <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="my-2 pa-0 bg-n">
                                     <MudImage Src="@_systemLogo" />
@@ -78,8 +80,8 @@
 @code {
     private AppSettings? _settings { get; set; }
     private bool _isLoading { get; set; } = true;
-    private string? _defaultAvatar { get; set; }
-    private string? _systemLogo { get; set; }
+    private string _defaultAvatar { get; set; } = string.Empty;
+    private string _systemLogo { get; set; } = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -96,13 +98,72 @@
         StateHasChanged();
     }
 
-    private void OnValidSubmit()
+    private async void OnValidSubmit()
     {
+        var saveSettingResult = await _settingsRepository.SaveAppSettings(_settings);
+        var saveAvatarResult = await _settingsRepository.SaveAvatar(_defaultAvatar);
+        var saveLogoResult = await _settingsRepository.SaveSystemLogo(_systemLogo);
 
+
+        _snackbar.Clear();
+        _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        if (saveSettingResult && saveAvatarResult && saveLogoResult)
+        {           
+            _snackbar.Add("Изменения сохранены", Severity.Success);
+        }
+        else
+        {
+            _snackbar.Add("Save settings error", Severity.Error);
+        }
+
+        
     }
 
     private async void UploadFiles(IBrowserFile file)
     {
+        var resizedFile = await file.RequestImageFileAsync(file.ContentType, 200, 200);
+        await using MemoryStream fs = new MemoryStream();
+        try
+        {
+            await resizedFile.OpenReadStream(maxAllowedSize: 60152).CopyToAsync(fs);
+
+
+            byte[] somBytes = Helper.GetBytes(fs);
+            var img64string = "data:image/gif;base64," + Convert.ToBase64String(somBytes, 0, somBytes.Length);
+            _defaultAvatar = img64string;
+
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Clear();
+            _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            _snackbar.Add(ex.Message, Severity.Error);
+        }
+
+        StateHasChanged();
+
+    }
+
+    private async void UploadLogo(IBrowserFile file)
+    {
+        var resizedFile = await file.RequestImageFileAsync(file.ContentType, 200, 200);
+        await using MemoryStream fs = new MemoryStream();
+        try
+        {
+            await resizedFile.OpenReadStream(maxAllowedSize: 55152).CopyToAsync(fs);
+            byte[] somBytes = Helper.GetBytes(fs);
+            var img64string = "data:image/gif;base64," + Convert.ToBase64String(somBytes, 0, somBytes.Length);
+            _systemLogo = img64string;
+
+        }
+        catch (Exception ex)
+        {
+            _snackbar.Clear();
+            _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            _snackbar.Add(ex.Message, Severity.Error);
+        }
+
+        StateHasChanged();
 
     }
 }

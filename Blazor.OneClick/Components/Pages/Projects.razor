@@ -9,6 +9,7 @@
 @using global::OneClick.Data.Repositoties
 @using global::OneClick.Domain.Domain.OneClickProjects
 @using global::OneClick.Domain.Domain.OneClickProjects.ValueObjects
+@using global::OneClick.Domain.Enums.Project
 @using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
@@ -76,7 +77,7 @@
                 @if (IsAdmin)
                 {
                     <MudTd DataLabel="@localize["Server"]">
-                        <MudLink Color="Color.Primary" Href="@("AppServer/"+context.ServerId)" Target="_blank">@context.ServerName</MudLink>
+                        <MudLink Color="Color.Primary" Href="@("AppServer/"+context.Server.ServerId)" Target="_blank">@context.Server.ServerName</MudLink>
                     </MudTd>
 
                 }
@@ -94,11 +95,11 @@
                 <MudTd DataLabel="@localize["Owner"]">
                     @if (IsAdmin)
                     {
-                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.OwnerId)">@context.OwnerName</MudLink>
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.Owner.OwnerId)">@context.Owner.OwnerName</MudLink>
                     }
                     else
                     {
-                        @context.OwnerName
+                        @context.Owner.OwnerName
                     }
                 </MudTd>
 

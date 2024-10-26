@@ -37,16 +37,16 @@ namespace OneClick.Data.Repositoties
                 Description = string.Empty,
                 EngineVersion = string.Empty,
                 LastPing = project.LastPing,
-                OwnerId = project.OwnerId,
-                OwnerName = project.OwnerName,
+                OwnerId = project.Owner.OwnerId,
+                OwnerName = project.Owner.OwnerName,
                 Payment = OneClickProjectDto.PaymentDto(project.Payment),
                 ProjectConfig = OneClickProjectDto.GetProjectConfigJson(config),
                 IsRun = 0,
                 ProcessId = 0,
                 ProjectDomain = project.ProjectDomain,
                 ProjectName = project.ProjectName,
-                ServerIP = project.ServerIP,
-                ServerName = project.ServerName,
+                ServerIP = project.Server.ServerIP,
+                ServerName = project.Server.ServerName,
                 ProjectErrorCode = 0,
                 ProjectWorkerTask = 0,
                 ProxyCount = 0,
@@ -82,7 +82,7 @@ namespace OneClick.Data.Repositoties
                 return projects;
             }
 
-            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project)));
+            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project, _context)));
 
             return projects;
         }
@@ -93,7 +93,7 @@ namespace OneClick.Data.Repositoties
 
             if (projectEntity != null)
             {
-                var project = OneClickProjectDto.ProjectDto(projectEntity);
+                var project = OneClickProjectDto.ProjectDto(projectEntity, _context);
                 if (project != null && logoRequired)
                 {
                     var logo = await GetLogoAsync(id, miniAvatar);
@@ -119,7 +119,7 @@ namespace OneClick.Data.Repositoties
                 return projects;
             }
 
-            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project)));
+            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project, _context)));
 
             return projects;
         }

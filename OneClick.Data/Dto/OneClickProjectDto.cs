@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using OneClick.Data.Data;
-using OneClick.Data.Enums;
 using OneClick.Domain.Domain.OneClickProjects;
 using OneClick.Domain.Domain.OneClickProjects.ValueObjects;
 using OneClick.Domain.Enums.Customer;
@@ -17,7 +16,7 @@ namespace OneClick.Data.Dto
                 return new ProjectPayment();
             }
 
-            var projectPayment =  new ProjectPayment
+            var projectPayment = new ProjectPayment
             {
                 Id = payment.Id,
                 IsDeleteReminded = payment.IsDeleteReminded,
@@ -26,7 +25,7 @@ namespace OneClick.Data.Dto
                 LastFreeze = payment.LastFreeze,
                 LastFreezeReminded = payment.LastFreezeReminded,
                 LastPayment = payment.LastPayment,
-                
+
             };
 
             return projectPayment;
@@ -38,7 +37,7 @@ namespace OneClick.Data.Dto
                 return new Payment();
             }
 
-            var payment =  new Payment
+            var payment = new Payment
             {
                 Id = projectPayment.Id,
                 IsDeleteReminded = projectPayment.IsDeleteReminded,
@@ -49,7 +48,7 @@ namespace OneClick.Data.Dto
                 LastPayment = projectPayment.LastPayment,
                 Message = string.Empty,
                 Severity = AppSeverity.Info,
-                
+
             };
 
             return payment;
@@ -77,26 +76,31 @@ namespace OneClick.Data.Dto
             }
             catch (Exception ex)
             {
-                return string.Empty;    
+                return string.Empty;
             }
         }
 
 
-        public static CopyTradingProject? ProjectDto(Project p)
+        public static CopyTradingProject? ProjectDto(Project p, ApplicationDbContext _context)
         {
+            var serverId = _context.Servers.Where(x => x.Name == p.ServerName).Select(x => x.Id).FirstOrDefault();
+
             var config = GetProjectConfig(p.ProjectConfig);
             var telegramBotResult = TelegramBot.Create(config.TelegramName, config.TelegramKey);
+            var otherSettingsResult = OtherSettingsValues.Create(config.EnableBilling, config.IsCrossTrading);
+            var ownerResult = Owner.Create(p.OwnerId, p.OwnerName);
+            var serverResult = ServerInfo.Create(p.ServerIP, p.ServerName, serverId);
 
-            //TelegramBot telegramBot;
-            if (!telegramBotResult.IsSuccess)
+            
+            if (!telegramBotResult.IsSuccess || !ownerResult.Success || !serverResult.Success)
             {
                 return null;
             }
 
-            var project = new CopyTradingProject(p.Id, p.OwnerId, p.OwnerName, p.ProjectDomain, telegramBotResult.Value,
-                p.ProjectName, p.ServerIP, p.ServerName, 0, p.ProxyCount, p.TraderMaxCount, p.UserMaxCount, p.TraderCount, p.UserCount,
-                p.CreateDate, p.LastPing, p.State, config.Exchanges, PaymentDto(p.Payment), string.Empty, config.Tariff,
-                config.DefaultLanguage, config.Languages, 0, config.AdminTelegram, config.AdminTelegramId);
+            var project = new CopyTradingProject(p.Id, p.ProjectDomain, telegramBotResult.Value, p.ProjectName, p.ServerIP, p.ServerName,
+                0, p.ProxyCount, p.TraderMaxCount, p.UserMaxCount, p.TraderCount, p.UserCount, p.CreateDate, p.LastPing, p.State, config.Exchanges,
+                PaymentDto(p.Payment), string.Empty, config.Tariff, config.DefaultLanguage, config.Languages, 0, config.AdminTelegram, config.AdminTelegramId,
+                otherSettingsResult.Data, ownerResult.Data, serverResult.Data);
 
 
             return project;

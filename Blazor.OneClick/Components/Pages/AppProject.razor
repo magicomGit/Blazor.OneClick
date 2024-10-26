@@ -8,9 +8,11 @@
 @using Microsoft.Extensions.Localization
 @using global::OneClick.Data.Data
 @using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.Domain.Enums.Project
 @using global::OneClick.UseCases.Intefaces.App
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
 
+@implements IDisposable
 @inject IStringLocalizer<Projects> _localize
 @inject IOneClickProjectRepositoty _projectRepository
 @inject IAppSettingsRepository _settingsRepository
@@ -85,14 +87,12 @@
                     <MudGrid Class="ma-0">
                         @foreach (ExchangeMarket exchange in Enum.GetValues(typeof(ExchangeMarket)))
                         {
-
                             if (exchange == ExchangeMarket.None)
                             {
                                 continue;
                             }
                             <MudItem xs="6" Class="pa-0">
                                 <MudCheckBox T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
-
                             </MudItem>
                         }
 
@@ -110,8 +110,13 @@
                             </MudTooltip>
                         </div>
                     </MudStack>
-                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.BillingEnabled" Label="@_localize["Billing"]" Size="Size.Small"></MudCheckBox>
-                    <MudCheckBox Class="my-1" Dense @bind-Value="@_project.CrossTradingEnabled" Label="@_localize["CrossTrading"]" Size="Size.Small"></MudCheckBox>
+                    @foreach (OtherSettings setting in Enum.GetValues(typeof(OtherSettings)))
+                    {                       
+                        <MudItem xs="6" Class="pa-0">
+                            <MudCheckBox T="bool" @bind-Value="_otherSettings[setting]" Class="my-1" Dense Label="@setting.ToString()" Size="Size.Small"></MudCheckBox>
+                        </MudItem>
+                    }
+
                     <hr />
                     <MudText>@_localize["DefaultLanguage"]: <strong>@(" " + SelectedDefaultLanguege?.Name)</strong></MudText>
                     <MudStack Row="true" AlignItems="AlignItems.Center" Class="my-2">
@@ -126,8 +131,18 @@
 
             <MudDivider />
 
-            <MudStack Row Justify="Justify.FlexEnd" Class="my-4">
-                <MudButton Class="btn-cust" ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" OnClick="RelocateDialog">@_localize["RelocateProject"]</MudButton>
+            <MudStack Row Wrap="Wrap.Wrap" AlignItems="AlignItems.Center" Class="my-4">
+
+                <MudStack Spacing="5" Row Class="my-3 pa-4 rounded-lg" Style="background-color: #FFF9C4">
+                    <BinanceLogo />
+                    <BitgetLogo />
+                    <BybitLogo />
+                    <KucoinLogo />
+                    <OkxLogo />
+                </MudStack>
+                <MudSpacer />
+
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Outlined" Color="Color.Error" OnClick="RelocateDialog">@_localize["RelocateProject"]</MudButton>
 
                 <MudButton OnClick="SaveChanges" Class="" Color="Color.Primary" Variant="Variant.Filled">@_localize["SaveChanges"]</MudButton>
             </MudStack>
@@ -148,6 +163,8 @@
     [Parameter]
     [SupplyParameterFromQuery] public int? id { get; set; }
 
+    private CancellationTokenSource? cancelTokenSource { get; set; }
+
     private bool _isLoading { get; set; } = true;
     private bool _isAdmin { get; set; } = true;
 
@@ -161,6 +178,12 @@
     private string runBlockVisibility = "invisible";
 
     private CopyTradingProject? _project { get; set; }
+    private CopyTradingProject? _currentProject { get; set; }
+    private Dictionary<OtherSettings, bool> _otherSettings { get; set; } = new Dictionary<OtherSettings, bool>
+    {
+         {OtherSettings.Billing, false},
+        {OtherSettings.CrossTrading, false},
+    };
     private Dictionary<ExchangeMarket, bool> _exchanges { get; set; } = new Dictionary<ExchangeMarket, bool>
     {
         {ExchangeMarket.Binance, false},
@@ -168,7 +191,7 @@
         {ExchangeMarket.BingX, false},
         {ExchangeMarket.Bybit, false},
         {ExchangeMarket.Kucoin, false},
-        {ExchangeMarket.Okex, false},
+        {ExchangeMarket.Okx, false},
     };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -177,6 +200,9 @@
         {
             return;
         }
+
+        cancelTokenSource = new CancellationTokenSource();
+        CancellationToken stoppingToken = cancelTokenSource.Token;
 
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         _isAdmin = Helper.CheckIsAdmin(authState);
@@ -188,6 +214,8 @@
             _exchanges[item] = true;
         }
 
+        _otherSettings[OtherSettings.Billing] = _project.OtherSettings.BillingEnabled;
+        _otherSettings[OtherSettings.CrossTrading] = _project.OtherSettings.CrossTradingEnabled;
 
         //языки
         SelectedDefaultLanguege = new LanguageModel { Code = _project.DefaultLanguage };
@@ -220,7 +248,7 @@
             SelectedLanguages[0].DefaultLang = true;
         }
 
-
+        _currentProject = Helper.GetDeepClone(_project);
         _isLoading = false;
         StateHasChanged();
     }
@@ -264,14 +292,44 @@
 
     }
 
-   
+
     private void RelocateDialog()
     {
 
     }
-   
+
     private void SaveChanges()
     {
 
+    }
+
+    private void ReloadingData(CancellationToken stoppingToken)
+    {
+        Task.Run(async () =>
+        {
+            var cnt = 0;
+            while (true)
+            {
+                cnt++;
+                if (stoppingToken.IsCancellationRequested || cnt > 30)
+                {
+                    break;
+                }
+
+                //await RefreshData();
+
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(10000);
+
+            }
+
+        }, stoppingToken);
+
+
+    }
+
+    public void Dispose()
+    {
+        cancelTokenSource?.Cancel();
     }
 }

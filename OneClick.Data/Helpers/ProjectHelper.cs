@@ -1,5 +1,6 @@
 ﻿using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Domain.OneClickProjects;
+using OneClick.Domain.Enums.Project;
 
 namespace OneClick.Data.Helpers
 {

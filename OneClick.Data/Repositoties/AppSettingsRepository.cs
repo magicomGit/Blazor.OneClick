@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using OneClick.Data.Constants;
 using OneClick.Data.Data;
 using OneClick.Domain.Domain.DomainModels;
 using OneClick.UseCases.Intefaces.App;
@@ -45,7 +46,7 @@ namespace OneClick.Data.Repositoties
         }
 
 
-        
+
         public async Task<AppSettings> GetAppSettings()
         {
             var appSettingsJson = await _context.Settings.Where(x => x.Name == SettingsNames.AppSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
@@ -71,7 +72,7 @@ namespace OneClick.Data.Repositoties
                 return null;
             }
 
-           
+
 
             return appSettings;
         }
@@ -79,27 +80,27 @@ namespace OneClick.Data.Repositoties
 
         public async Task<string> GetDefaultAvatar()
         {
-            var defaultAvatar = await  _context.Settings.Where(x => x.Name == SettingsNames.DefaultAvatar).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            var defaultAvatar = await _context.Settings.Where(x => x.Name == SettingsNames.DefaultAvatar).Select(s => s.JsonObject).FirstOrDefaultAsync();
             if (!string.IsNullOrEmpty(defaultAvatar))
             {
                 return defaultAvatar;
             }
             else
             {
-                return "";
+                return DefaultAvatar.Content;
             }
         }
-        
+
         public async Task<string> GetSystemLogo()
         {
-            var systemLogo = await  _context.Settings.Where(x => x.Name == SettingsNames.SystemLogo).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            var systemLogo = await _context.Settings.Where(x => x.Name == SettingsNames.SystemLogo).Select(s => s.JsonObject).FirstOrDefaultAsync();
             if (!string.IsNullOrEmpty(systemLogo))
             {
                 return systemLogo;
             }
             else
             {
-                return "";
+                return SystemLogo.Content;
             }
         }
 
@@ -142,7 +143,7 @@ namespace OneClick.Data.Repositoties
 
         public async Task<BillingSettings> GetBillingSettings()
         {
-            var billingSettingsJson =await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
+            var billingSettingsJson = await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
 
             if (billingSettingsJson == null)
             {
@@ -150,7 +151,7 @@ namespace OneClick.Data.Repositoties
                 { Name = SettingsNames.BillingSettings, JsonObject = GetBillingSettingsJson(new BillingSettings()) });
                 await _context.SaveChangesAsync();
 
-                billingSettingsJson =await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
+                billingSettingsJson = await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).Select(s => s.JsonObject).FirstOrDefaultAsync();
                 //log
             }
 
@@ -166,6 +167,129 @@ namespace OneClick.Data.Repositoties
             }
 
             return billingSettings;
+        }
+
+        public async Task<bool> SaveBillingSettings(BillingSettings settings)
+        {
+            var settingJson = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+            var billingSettings = await _context.Settings.Where(x => x.Name == SettingsNames.BillingSettings).FirstOrDefaultAsync();
+
+            if (billingSettings != null)
+            {
+                try
+                {
+                    billingSettings.JsonObject = settingJson;
+                    var saveResult = _context.Update(billingSettings);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+
+            }
+
+
+
+            return true;
+        }
+
+
+
+        public async Task<bool> SaveAppSettings(AppSettings settings)
+        {
+            var settingJson = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+            var oldSettings = await _context.Settings.Where(x => x.Name == SettingsNames.AppSettings).FirstOrDefaultAsync();
+
+            if (oldSettings != null)
+            {
+                try
+                {
+                    oldSettings.JsonObject = settingJson;
+                    var saveResult = _context.Update(oldSettings);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+
+            }
+
+            return true;
+        }
+
+
+
+        public async Task<bool> SaveServicesPrices(ServicesPrice settings)
+        {
+            var settingJson = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+            var oldSettings = await _context.Settings.Where(x => x.Name == SettingsNames.ServicesPrice).FirstOrDefaultAsync();
+
+            if (oldSettings != null)
+            {
+                try
+                {
+                    oldSettings.JsonObject = settingJson;
+                    var saveResult = _context.Update(oldSettings);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+
+            }
+
+
+
+            return true;
+        }
+        
+        public async Task<bool> SaveAvatar(string settings)
+        {        
+            var oldSettings = await _context.Settings.Where(x => x.Name == SettingsNames.DefaultAvatar).FirstOrDefaultAsync();
+
+            if (oldSettings != null)
+            {
+                try
+                {
+                    oldSettings.JsonObject = settings;
+                    var saveResult = _context.Update(oldSettings);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        public async Task<bool> SaveSystemLogo(string settings)
+        {        
+            var oldSettings = await _context.Settings.Where(x => x.Name == SettingsNames.SystemLogo).FirstOrDefaultAsync();
+
+            if (oldSettings != null)
+            {
+                try
+                {
+                    oldSettings.JsonObject = settings;
+                    var saveResult = _context.Update(oldSettings);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         //================= private methods ========================

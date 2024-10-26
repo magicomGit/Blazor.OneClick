@@ -10,6 +10,7 @@ using OneClick.Data.Data;
 using OneClick.Data.Helpers;
 using OneClick.Data.Repositoties;
 using OneClick.Domain.Domain.Balances;
+using OneClick.Domain.Domain.DomainModels;
 using OneClick.Services.Balances;
 using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.App;
@@ -41,8 +42,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseLazyLoadingProxies()
-    .UseNpgsql(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
-    //.UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+    //.UseNpgsql(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
+    .UseSqlServer(Settings.ConnectionString, b => b.MigrationsAssembly("Blazor.OneClick")));
 
 
 

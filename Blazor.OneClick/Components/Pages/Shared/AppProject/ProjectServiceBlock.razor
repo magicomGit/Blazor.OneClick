@@ -3,6 +3,7 @@
 @using Microsoft.Extensions.Localization
 @using global::OneClick.Data.Data
 @using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.Domain.Enums.Project
 @using global::OneClick.UseCases.Intefaces.App
 @inject NavigationManager Navigate
 @inject IDialogService _dialogService
@@ -190,7 +191,7 @@
 
     public async Task FullDeleteProject()
     {
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var options = new DialogOptions() { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
 
         var parameters = new DialogParameters<InputConfirmDialog>();
         parameters.Add(x => x.ContentText, @localize["DeleteProjectDescriptionModal"]);
@@ -238,7 +239,7 @@
 
     private async Task FreezeProject(ProjectState state)
     {
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var options = new DialogOptions() { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
 
         var parameters = new DialogParameters<InputConfirmDialog>();
         parameters.Add(x => x.ContentText, @localize["FreezeProjectDescriptionModal"]);
