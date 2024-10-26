@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OneClick.Data.Data;
-using OneClick.Domain.Domain.DomainServices;
+using OneClick.Domain.Domain.DomainModels;
 using OneClick.UseCases.Intefaces.App;
 using static OneClick.Domain.Enums.App.AppEnums;
 

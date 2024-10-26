@@ -1,4 +1,4 @@
-﻿using OneClick.Domain.Domain.DomainServices;
+﻿using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Domain.OneClickProjects;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;

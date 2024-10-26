@@ -1,4 +1,4 @@
-﻿using OneClick.Domain.Domain.DomainServices;
+﻿using OneClick.Domain.Domain.DomainModels;
 
 namespace OneClick.UseCases.Intefaces.App
 {

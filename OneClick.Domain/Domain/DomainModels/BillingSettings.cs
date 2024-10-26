@@ -1,6 +1,6 @@
 ﻿using OneClick.Domain.Enums.Transaction;
 
-namespace OneClick.Domain.Domain.DomainServices
+namespace OneClick.Domain.Domain.DomainModels
 {
     public class BillingSettings
     {

@@ -1,6 +1,6 @@
 ﻿using static OneClick.Domain.Enums.App.AppEnums;
 
-namespace OneClick.Domain.Domain.DomainServices
+namespace OneClick.Domain.Domain.DomainModels
 {
     public class AppSettings
     {

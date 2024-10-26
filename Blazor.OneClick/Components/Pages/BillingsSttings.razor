@@ -1,9 +1,15 @@
 ﻿@page "/billingsettings"
-@using global::OneClick.Domain.Domain.DomainServices
+@using Blazor.OneClick.Constants
+@using Blazor.OneClick.Helpers
+@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json
+@using global::OneClick.Domain.Domain.DomainModels
 @using global::OneClick.Domain.Enums.Transaction
 @using global::OneClick.UseCases.Intefaces.App
 
+@attribute [Authorize(Roles = Settings.AdminRole)]
 @inject IAppSettingsRepository _settingsRepository
+@inject AuthenticationStateProvider _authenticationStateProvider
 
 <PageTitle> Настройки биллинг| CopyTrader</PageTitle>
 
@@ -19,14 +25,14 @@
         <MudItem xs="12" md="9">
 
             <MudText Typo="Typo.body2"><b>Владелец счета One Click</b></MudText>
-            <MudTextField Label="Id администратора" Variant="Variant.Outlined" @bind-Value="_adminId" />
+            <MudTextField Disabled Label="Id администратора" Variant="Variant.Outlined" @bind-Value="_adminId" />
 
         </MudItem>
         <MudDivider Class="my-4" />
 
         <MudItem xs="12" md="9">
             <MudText Typo="Typo.body2"><b>Выбор способа оплаты</b></MudText>
-            <MudStack Row AlignItems="AlignItems.Center">
+            <MudStack Row Wrap="Wrap.Wrap" Spacing="6" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
                 <MudItem xs="12" md="6">
                     <MudSelect @bind-Value="_billingSettings.DefaultPayment" Variant="Variant.Outlined" T="PaymentSystem" SelectedValuesChanged="@PayChanged">
                         @foreach (PaymentSystem item in Enum.GetValues(typeof(PaymentSystem)))
@@ -48,64 +54,98 @@
                         }
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="12" md="6">
+                <MudItem xs="12" md="5">
                     @if (_billingSettings?.DefaultPayment == PaymentSystem.PaymentViaAdmin)
-                    {                       
-                        <MudSwitch @bind-Value="AdminPaySwitch" ThumbIcon="@(AdminPaySwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
-                                   ThumbIconColor="@(AdminPaySwitch ? Color.Success : Color.Error)" Size="Size.Large">Admin Pay</MudSwitch>
+                    {
+                        <MudSwitch @bind-Value="_adminPaySwitch" ThumbIcon="@(_adminPaySwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                                   ThumbIconColor="@(_adminPaySwitch ? Color.Success : Color.Error)" Size="Size.Large">Admin Pay</MudSwitch>
 
                     }
                     @if (_billingSettings?.DefaultPayment == PaymentSystem.Cryptomus)
                     {
-                        <MudSwitch @bind-Value="CryptomusSwitch" ThumbIcon="@(CryptomusSwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
-                                   ThumbIconColor="@(CryptomusSwitch ? Color.Success : Color.Error)" Size="Size.Large">Cryptomus</MudSwitch>
-                       
+                        <MudSwitch @bind-Value="_cryptomusSwitch" ThumbIcon="@(_cryptomusSwitch ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                                   ThumbIconColor="@(_cryptomusSwitch ? Color.Success : Color.Error)" Size="Size.Large">Cryptomus</MudSwitch>
+
                     }
-                    
+
                 </MudItem>
             </MudStack>
-            
-           
+
+
         </MudItem>
         <MudItem xs="12" md="9" Class="mt-4">
-        @if (_billingSettings?.DefaultPayment == PaymentSystem.PaymentViaAdmin)
-        {
-            <MudStack Row>
-                <MudItem xs="12" md="6">
-                        <MudSelect Label="Network" Text="ert" T="string" Value="@("Thron")" Variant="Variant.Outlined">
-
+            @if (_billingSettings?.DefaultPayment == PaymentSystem.PaymentViaAdmin)
+            {
+                <MudGrid >
+                    <MudItem xs="12" md="6">
+                        <MudSelect Label="Network" @bind-Value="_billingSettings.Network" T="string" Variant="Variant.Outlined">
+                            @foreach (var item in _networks)
+                            {
+                                <MudSelectItem Value="@item.Name">@item.Name</MudSelectItem>
+                            }
                         </MudSelect>
-                </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudTextField Variant="Variant.Outlined" Label="Wallet address" @bind-Value="_billingSettings.WalletAddress" />
-                    </MudItem>
-            </MudStack>
-           
-        }
-         @if (_billingSettings?.DefaultPayment == PaymentSystem.Cryptomus)
-        {
-                <MudStack Row >
-                    <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Merchant Id" @bind-Value="_billingSettings.CryptomusMerchantId" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Api key" @bind-Value="_billingSettings.CryptomusApiKey" />
+                        <MudTextField Disabled="!_isAdminLogin" Variant="Variant.Outlined" Label="Wallet address" @bind-Value="_billingSettings.WalletAddress" />
                     </MudItem>
-                   
-                </MudStack>
-                <MudStack Row>
-                    
-                    <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Callback Url" @bind-Value="_billingSettings.CryptomusCallbackUrl" />
-                    </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudTextField Disabled="!CryptomusSwitch" Variant="Variant.Outlined" Label="Redirect Url" @bind-Value="_billingSettings.CryptomusRedirectUrl" />
-                    </MudItem>
-                </MudStack>
+                </MudGrid>
 
-        }
+            }
+            @if (_billingSettings?.DefaultPayment == PaymentSystem.Cryptomus)
+            {
+                <MudGrid >
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Merchant Id" @bind-Value="_billingSettings.CryptomusMerchantId" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Api key" @bind-Value="_billingSettings.CryptomusApiKey" />
+                    </MudItem>
+
+                </MudGrid>
+                <MudGrid>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Callback Url" @bind-Value="_billingSettings.CryptomusCallbackUrl" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Disabled="!_cryptomusSwitch" Variant="Variant.Outlined" Label="Redirect Url" @bind-Value="_billingSettings.CryptomusRedirectUrl" />
+                    </MudItem>
+                </MudGrid>
+
+            }
         </MudItem>
         <MudDivider Class="my-4" />
+        <MudText Typo="Typo.body2"><b>Настройки списания платежей</b></MudText>
+        <MudItem xs="12" md="9">
+            <MudGrid >
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField Variant="Variant.Outlined" Label="Напоминание об оплате. Дни"
+                                  @bind-Value="_billingSettings.DaysBeforeBill" />
+                </MudItem>
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField T="int" Variant="Variant.Outlined" Label="Дней до удаления"
+                                  @bind-Value="_billingSettings.DaysBeforeDelete" />
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.body2"><b>Настройки партнёрской программы</b></MudText>
+        <MudItem xs="12" md="9">
+            <MudGrid>
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField T="double" Variant="Variant.Outlined" Label="Реферальный бонус в сеть.%"
+                                  @bind-Value="_billingSettings.ReferalBonus" />
+                </MudItem>
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField Disabled T="int" Variant="Variant.Outlined" Label="Кол-во уровней"
+                                  @bind-Value="_billingSettings.ReferalLevels" />
+                </MudItem>
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField T="int" Variant="Variant.Outlined" Label="Часть первого реферала.%"
+                                  @bind-Value="_billingSettings.PartFirstReferal" />
+                </MudItem>
+            </MudGrid>
+        </MudItem>
     }
 </MudPaper>
 
@@ -113,8 +153,10 @@
     private BillingSettings? _billingSettings { get; set; }
     private bool _isLoading { get; set; } = true;
     private string? _adminId { get; set; }
-    private bool AdminPaySwitch { get; set; }
-    private bool CryptomusSwitch { get; set; }
+    private bool _adminPaySwitch { get; set; }
+    private bool _cryptomusSwitch { get; set; }
+    private bool _isAdminLogin { get; set; }
+    private List<BinanceNetwork> _networks { get; set; } = new List<BinanceNetwork>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -122,6 +164,12 @@
         {
             return;
         }
+
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userName = authState.User.Identity.Name;
+        _isAdminLogin = userName.ToLower() == "admin"? true: false;
+
+        _networks = JsonConvert.DeserializeObject<List<BinanceNetwork>>(NetworkDataList.List);
 
         _billingSettings = await _settingsRepository.GetBillingSettings();
         _adminId = await _settingsRepository.GetAdminId();
