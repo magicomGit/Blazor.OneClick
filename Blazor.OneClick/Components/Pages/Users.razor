@@ -22,23 +22,23 @@ else
     [Parameter]
     [SupplyParameterFromQuery] public string? id { get; set; }
 
-    private bool _isLoading { get; set; } = true;
+    // private bool _isLoading { get; set; } = true;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (!firstRender)
+    //     {
+    //         return;
+    //     }
 
 
-        if (string.IsNullOrEmpty(id))
-        {
+    //     if (string.IsNullOrEmpty(id))
+    //     {
 
-        }
-        else
-        {
+    //     }
+    //     else
+    //     {
 
-        }
-    }
+    //     }
+    // }
 }

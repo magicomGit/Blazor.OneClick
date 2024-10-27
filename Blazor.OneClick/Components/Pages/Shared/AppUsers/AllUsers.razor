@@ -1,5 +1,127 @@
-﻿<h3>AllUsers</h3>
+﻿@using Microsoft.Extensions.Localization
+@using global::OneClick.Domain.Domain.Customers
+@using global::OneClick.UseCases.Intefaces.User
+@inject IStringLocalizer<Users> _localize
+@inject IUserRepository _userRepository
+
+<PageTitle>@_localize["Users"] | CopyTrader</PageTitle>
+
+<MudPaper MinHeight="400px" MaxWidth="1300px" Outlined Class="cust-block ma-2 ma-md-4">
+    @if (_isLoading)
+    {
+        
+    }
+    else
+    {
+        @* <MudTable Elevation="2" Items="_users">
+            <HeaderContent>
+
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Name"))">
+                    Name <MudIcon Color="@(sortedBy == "Name" ? Color.Surface : Color.Transparent)" Icon="@icons[NameSortDesc == false ? 0 : 1]" Size="Size.Small" />
+                </MudTh>
+                <MudTh>ProjectCount</MudTh>
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Telegram"))">
+                    Telegram <MudIcon Color="@(sortedBy == "Telegram" ? Color.Surface : Color.Transparent)" Icon="@icons[TelegramSortDesc == false ? 0 : 1]" Size="Size.Small" />
+                </MudTh>
+                <MudTh>
+                    Roles
+                </MudTh>
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Status"))">
+                    Status <MudIcon Color="@(sortedBy == "Status" ? Color.Surface : Color.Transparent)" Icon="@icons[StatusSortDesc == false ? 0 : 1]" Size="Size.Small" />
+                </MudTh>
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Balance"))">
+                    Balance <MudIcon Color="@(sortedBy == "Balance" ? Color.Surface : Color.Transparent)" Icon="@icons[BalanceSortDesc == false ? 0 : 1]" Size="Size.Small" />
+                </MudTh>
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Registered"))">
+                    Registered <MudIcon Color="@(sortedBy == "Registered" ? Color.Surface : Color.Transparent)" Icon="@icons[RegisteredSortDesc == false ? 0 : 1]" Size="Size.Small" />
+                </MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                        <MudAvatar Size="Size.Medium">
+                            <MudImage Src="@context.Avatar"></MudImage>
+                        </MudAvatar>
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Info" Href="@("users/"+context.Id)">@context.UserName</MudLink>
+                    </MudStack>
+
+
+                </MudTd>
+                <MudTd DataLabel="ProjectCount"></MudTd>
+                <MudTd DataLabel="Telegram">
+                    <MudLink Class="text-decoration-none" Color="Color.Info" OnClick="(()=>TelegramRequest(context.Telegram))">@context.Telegram</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Roles"></MudTd>
+                <MudTd DataLabel="Status"></MudTd>
+                <MudTd DataLabel="Balance">@context.Balance?.WalletBalance.ToString("N2")</MudTd>
+                <MudTd DataLabel="Registered">@context.Registered</MudTd>
+                <MudTd>
+                    <MudIconButton OnClick="(()=>DepositByAdminDialog(context))" Color="Color.Success" Icon="@Icons.Material.Filled.AddCard"></MudIconButton>
+                    <MudIconButton OnClick="(()=>EditUser(context.Id))" Color="Color.Default" Icon="@Icons.Material.Filled.Edit" aria-label="edit" />
+
+                    <MudIconButton OnClick="(()=>MessagerDialog(context))" Color="Color.Surface" Icon="@Icons.Material.Filled.Mail" aria-label="delete" />
+
+                </MudTd>
+            </RowTemplate>
+        </MudTable> *@
+    }
+
+</MudPaper>
 
 @code {
+    private bool _isLoading { get; set; } = true;
+    private List<Customer>? _users { get; set; }
+    private string[] icons = { Icons.Material.Filled.ArrowDownward, Icons.Material.Filled.ArrowUpward };
+    private string sortedBy = "Registered";
 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _users = await _userRepository.GetAsync();
+    }
+
+    void SortEvent(string title)
+    {
+        bool? sortedDesc = null;
+        // switch (title)
+        // {
+        //     case "Name":
+        //         sortedBy = "Name";
+        //         sortedDesc = NameSortDesc == null ? NameSortDesc = sortedDesc = false : sortedDesc = NameSortDesc = !NameSortDesc;
+        //         break;
+
+        //     case "Telegram":
+        //         sortedBy = "Telegram";
+        //         sortedDesc = TelegramSortDesc == null ? TelegramSortDesc = sortedDesc = false : sortedDesc = TelegramSortDesc = !TelegramSortDesc;
+        //         break;
+
+        //     case "Status":
+        //         sortedBy = "Status";
+        //         sortedDesc = StatusSortDesc == null ? StatusSortDesc = sortedDesc = false : sortedDesc = StatusSortDesc = !StatusSortDesc;
+        //         break;
+
+        //     case "Balance":
+        //         sortedBy = "Balance";
+        //         sortedDesc = BalanceSortDesc == null ? BalanceSortDesc = sortedDesc = false : sortedDesc = BalanceSortDesc = !BalanceSortDesc;
+        //         break;
+
+        //     case "Registered":
+        //         sortedBy = "Registered";
+        //         sortedDesc = RegisteredSortDesc == null ? RegisteredSortDesc = sortedDesc = false : sortedDesc = RegisteredSortDesc = !RegisteredSortDesc;
+        //         break;
+
+        //     default:
+        //         sortedBy = "Registered";
+        //         sortedDesc = false;
+        //         break;
+        // }
+
+        // SortBy(title, sortedDesc);
+    }
 }
