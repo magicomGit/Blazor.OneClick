@@ -1,14 +1,12 @@
-﻿using CloudFlare.Client.Client.Users;
-using Microsoft.EntityFrameworkCore;
-using OneClick.Data.Builreds;
+﻿using Microsoft.EntityFrameworkCore;
 using OneClick.Data.Data;
 using OneClick.Data.Dto;
+using OneClick.Data.Factories;
 using OneClick.Domain.Domain.Customers;
 using OneClick.Domain.Enums.Customer;
 using OneClick.UseCases.Enums;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.User;
-using System.Linq;
 
 namespace OneClick.Data.Repositoties
 {
@@ -24,21 +22,21 @@ namespace OneClick.Data.Repositoties
 
 
 
-        public async Task<List<Customer>> GetPageAsync(int page, int ItemsPerPage, AppUserSortBy sortBy = AppUserSortBy.Registered, bool desc = false,
+        public async Task<List<Customer>> GetPageAsync(int page = 1, int ItemsPerPage = 15, AppUserSortBy sortBy = AppUserSortBy.Registered, bool desc = false,
             bool requireBalnce = true, bool requirePayment = true, bool requireAlerts = true)
         {
-            var customers = new List<Customer>();            
+            var customers = new List<Customer>();
 
-            var expression = AppUserExpressionBuiler.Build(sortBy);
+            var expression = AppUserExpressionFactory.Build(sortBy);
 
             var userQuery = _context.Users.AsNoTracking();
             if (desc)
             {
-                userQuery = userQuery.OrderByDescending(expression);
+                userQuery = userQuery.OrderByDescending(expression).Skip(ItemsPerPage * (page - 1)).Take(ItemsPerPage);
             }
             else
             {
-                userQuery = userQuery.OrderBy(expression);
+                userQuery = userQuery.OrderBy(expression).Skip(ItemsPerPage * (page - 1)).Take(ItemsPerPage);
             }
 
             if (requireBalnce)
@@ -68,7 +66,7 @@ namespace OneClick.Data.Repositoties
         {
 
             var customers = new List<Customer>();
-            
+
 
             var userQuery = _context.Users.AsNoTracking();
 
@@ -91,9 +89,9 @@ namespace OneClick.Data.Repositoties
 
             if (users == null) { return customers; }
 
-            customers = DTO(users , requireBalnce,  requirePayment,  requireAlerts);
+            customers = DTO(users, requireBalnce, requirePayment, requireAlerts);
 
-            
+
 
             return customers;
         }

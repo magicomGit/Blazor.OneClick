@@ -12,7 +12,6 @@ using OneClick.Data.Repositoties;
 using OneClick.Domain.Domain.Balances;
 using OneClick.Domain.Domain.DomainModels;
 using OneClick.Services.Balances;
-using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
 using OneClick.UseCases.Intefaces.OneClickProjects;

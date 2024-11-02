@@ -1,8 +1,12 @@
 ﻿@using Microsoft.Extensions.Localization
 @using global::OneClick.Domain.Domain.Customers
+@using global::OneClick.UseCases.Enums
 @using global::OneClick.UseCases.Intefaces.User
 @inject IStringLocalizer<Users> _localize
 @inject IUserRepository _userRepository
+@inject IJSRuntime _JSRuntime;
+@inject NavigationManager _navigate
+
 
 <PageTitle>@_localize["Users"] | CopyTrader</PageTitle>
 
@@ -13,26 +17,26 @@
     }
     else
     {
-        @* <MudTable Elevation="2" Items="_users">
+         <MudTable Elevation="2" Items="_users">
             <HeaderContent>
 
-                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Name"))">
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent(AppUserSortBy.UserName))">
                     Name <MudIcon Color="@(sortedBy == "Name" ? Color.Surface : Color.Transparent)" Icon="@icons[NameSortDesc == false ? 0 : 1]" Size="Size.Small" />
                 </MudTh>
                 <MudTh>ProjectCount</MudTh>
-                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Telegram"))">
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent(AppUserSortBy.Telegram))">
                     Telegram <MudIcon Color="@(sortedBy == "Telegram" ? Color.Surface : Color.Transparent)" Icon="@icons[TelegramSortDesc == false ? 0 : 1]" Size="Size.Small" />
                 </MudTh>
                 <MudTh>
                     Roles
                 </MudTh>
-                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Status"))">
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent(AppUserSortBy.Status))">
                     Status <MudIcon Color="@(sortedBy == "Status" ? Color.Surface : Color.Transparent)" Icon="@icons[StatusSortDesc == false ? 0 : 1]" Size="Size.Small" />
                 </MudTh>
-                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Balance"))">
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent(AppUserSortBy.WalletBalance))">
                     Balance <MudIcon Color="@(sortedBy == "Balance" ? Color.Surface : Color.Transparent)" Icon="@icons[BalanceSortDesc == false ? 0 : 1]" Size="Size.Small" />
                 </MudTh>
-                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent("Registered"))">
+                <MudTh Style="cursor: pointer" onclick="@(()=>SortEvent(AppUserSortBy.Registered))">
                     Registered <MudIcon Color="@(sortedBy == "Registered" ? Color.Surface : Color.Transparent)" Icon="@icons[RegisteredSortDesc == false ? 0 : 1]" Size="Size.Small" />
                 </MudTh>
                 <MudTh></MudTh>
@@ -64,7 +68,7 @@
 
                 </MudTd>
             </RowTemplate>
-        </MudTable> *@
+        </MudTable> 
     }
 
 </MudPaper>
@@ -75,6 +79,13 @@
     private string[] icons = { Icons.Material.Filled.ArrowDownward, Icons.Material.Filled.ArrowUpward };
     private string sortedBy = "Registered";
 
+    private bool? NameSortDesc { get; set; }
+    private bool? ProjectCountSortDesc { get; set; }
+    private bool? TelegramSortDesc { get; set; }
+    private bool? RolesSortDesc { get; set; }
+    private bool? StatusSortDesc { get; set; }
+    private bool? BalanceSortDesc { get; set; }
+    private bool? RegisteredSortDesc { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -83,11 +94,16 @@
             return;
         }
 
-        _users = await _userRepository.GetAsync();
+        _users = await _userRepository.GetPageAsync(1, 10, AppUserSortBy.Registered, desc: true);
+        _isLoading = false;
+        StateHasChanged();
     }
 
-    void SortEvent(string title)
+    async void SortEvent(AppUserSortBy sortBy)
     {
+
+        _users = await _userRepository.GetPageAsync(1, 10, sortBy);
+        StateHasChanged();
         bool? sortedDesc = null;
         // switch (title)
         // {
@@ -123,5 +139,77 @@
         // }
 
         // SortBy(title, sortedDesc);
+    }
+
+
+    private async Task TelegramRequest(string telegram)
+    {
+        var url = "https://t.me/" + telegram;
+        await _JSRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private async void DepositByAdminDialog(Customer user)
+    {
+        // var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+        // var parameters = new DialogParameters<DepositByAdminDialog>();
+        // parameters.Add(x => x.ButtonText, "Пополнить");
+        // parameters.Add(x => x.ContentText, "Пополнение баланса пользователя " + user.Name);
+        // parameters.Add(x => x.ContentText2, "");
+
+
+        // var dialog = await DialogService.ShowAsync<DepositByAdminDialog>("Пополнение баланса", parameters, options);
+        // var result = await dialog.Result;
+        // if (!result.Cancelled)
+        // {
+        //     var deposit = (double)result.Data;
+        //     if (deposit <= 0)
+        //     {
+        //         return;
+        //     }
+        //     else
+        //     {
+        //         //var response = await Transaction.New(TransactionCode.Deposit, new Guid(user.Id),"", PaymentSystem.PaymentViaAdmin, deposit, "");
+        //         var response = await Transaction.Deposit(user.Id, "", PaymentSystem.PaymentViaAdmin, deposit, "");
+
+        //     }
+
+        // }
+        // StateHasChanged();
+    }
+
+    private void EditUser(string id)
+    {
+        _navigate.NavigateTo("users/" + id);
+    }
+
+    private async Task MessagerDialog(Customer user)
+    {
+        // var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+
+        // var parameters = new DialogParameters<RemindDialog>();
+        // parameters.Add(x => x.ContentText, "Сообщение для пользователя " + user.Name);
+        // parameters.Add(x => x.ButtonText, "Отправить");
+        // parameters.Add(x => x.Color, Color.Info);
+        // parameters.Add(x => x.UserTelegramId, user.TelegramId);
+
+        // parameters.Add(x => x.Icon, Icons.Material.Filled.Mail);
+
+        // var dialog = await DialogService.ShowAsync<RemindDialog>("Мессенджер", parameters, options);
+        // var dialogResult = await dialog.Result;
+        // if (!dialogResult.Cancelled)
+        // {
+        //     var alert = (Models.Alert)dialogResult.Data;
+        //     var appUser = _context.Users.Where(x => x.Id == user.Id).FirstOrDefault();
+        //     if (appUser != null)
+        //     {
+        //         appUser.Alerts.Add(alert);
+        //         _context.Update(appUser);
+        //         _context.SaveChanges();
+
+        //         StateHasChanged();
+
+        //     }
+
+        // }
     }
 }

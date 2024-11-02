@@ -1,7 +1,6 @@
 ﻿using OneClick.Domain.Domain.Balances;
 using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Enums.Transaction;
-using OneClick.Services.Contracts;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
 using OneClick.UseCases.Intefaces.User;
@@ -43,7 +42,7 @@ namespace OneClick.Services.Balances
                 operations.Add(operation);
 
                 var newTransaction = new OneClickTransaction(id: 0, TransactionCode.Deposit, new Guid(user.Id), paymentSystem, "", user.UserName, summ, DateTime.UtcNow,
-                    description, TransactionType.Deposit,TransactionStatus.Await, operations);
+                    description, TransactionType.Deposit, TransactionStatus.Await, operations);
 
 
                 var addResult = await _transactionRepository.Add(newTransaction);
@@ -99,7 +98,7 @@ namespace OneClick.Services.Balances
 
                 if (transaction.PaySystem == PaymentSystem.PaymentViaAdmin)
                 {
-                    var implementer = await _userRepository.GetByIdAsync(implementerId.ToString()); 
+                    var implementer = await _userRepository.GetByIdAsync(implementerId.ToString());
                     implementerId = new Guid(implementer.Id);
                     implementerName = implementer.UserName;
                 }
@@ -113,17 +112,17 @@ namespace OneClick.Services.Balances
 
                 //добавляем операцию
                 transaction.ChangeStatus(TransactionStatus.Completed);
-               
+
                 transaction.SetSumm(summ);
 
                 transaction.Operations.Add(new Operation(0, 0, implementerId, implementerName, DateTime.UtcNow, description, 0, OpirationType.Approve, OperationDirection.None,
                     TransactionCode.ApproveDeposit, transaction.PaySystem, payId));
-               
-                 transaction.Operations.Add(new Operation(0, summ, new Guid(user.Id), user.UserName, DateTime.UtcNow, description, user.Balance.WalletBalance + summ, 
-                     OpirationType.Transfer, OperationDirection.Income, TransactionCode.Deposit, transaction.PaySystem, payId));
-               
 
-                
+                transaction.Operations.Add(new Operation(0, summ, new Guid(user.Id), user.UserName, DateTime.UtcNow, description, user.Balance.WalletBalance + summ,
+                    OpirationType.Transfer, OperationDirection.Income, TransactionCode.Deposit, transaction.PaySystem, payId));
+
+
+
 
                 //баланс пользователя
                 user.Balance.WalletBalance += summ;
@@ -142,13 +141,13 @@ namespace OneClick.Services.Balances
                     response.Success = false;
                 }
 
-                
+
                 return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"Transaction Id: {transactionId}  | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} { ex.Message} ";
+                response.Message = $"Transaction Id: {transactionId}  | Код транзакции: {TransactionCode.ApproveDeposit.ToString()} {ex.Message} ";
                 return response;
             }
         }

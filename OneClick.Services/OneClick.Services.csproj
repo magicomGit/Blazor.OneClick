@@ -16,4 +16,8 @@
     <ProjectReference Include="..\OneClick.UseCases\OneClick.UseCases.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\" />
+  </ItemGroup>
+
 </Project>

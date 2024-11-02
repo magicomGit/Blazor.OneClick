@@ -1,16 +1,10 @@
-﻿using CloudFlare.Client.Client.Users;
-using OneClick.Data.Data;
+﻿using OneClick.Data.Data;
 using OneClick.UseCases.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OneClick.Data.Builreds
+namespace OneClick.Data.Factories
 {
-    public class AppUserExpressionBuiler
+    public class AppUserExpressionFactory
     {
         public static Expression<Func<ApplicationUser, object>> Build(AppUserSortBy sortBy)
         {
@@ -20,11 +14,11 @@ namespace OneClick.Data.Builreds
             switch (sortBy)
             {
                 case AppUserSortBy.UserName:
-                     expression = x => x.UserName;
+                    expression = x => x.UserName;
                     return expression;
-                    
+
                 case AppUserSortBy.Telegram:
-                     expression = x => x.Telegram;
+                    expression = x => x.Telegram;
                     return expression;
 
                 case AppUserSortBy.Status:
@@ -44,5 +38,5 @@ namespace OneClick.Data.Builreds
         }
     }
 
-   
+
 }
