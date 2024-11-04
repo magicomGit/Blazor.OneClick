@@ -1,4 +1,5 @@
 ﻿@page "/Projects/{id:int}"
+
 @using Blazor.OneClick.Components.Pages.Shared.AppProject
 @using Blazor.OneClick.Components.Pages.Shared.Modals
 @using Blazor.OneClick.Components.Pages.Shared.SVG
@@ -7,10 +8,15 @@
 @using CloudFlare.Client.Enumerators
 @using Microsoft.Extensions.Localization
 @using global::OneClick.Data.Data
+@using global::OneClick.Domain.Domain.Balances
+@using global::OneClick.Domain.Domain.DomainModels
 @using global::OneClick.Domain.Domain.OneClickProjects
 @using global::OneClick.Domain.Enums.Project
+@using global::OneClick.Services.Helpers
 @using global::OneClick.UseCases.Intefaces.App
+@using global::OneClick.UseCases.Intefaces.Balances
 @using global::OneClick.UseCases.Intefaces.OneClickProjects
+@using global::OneClick.UseCases.Intefaces.User
 
 @implements IDisposable
 @inject IStringLocalizer<Projects> _localize
@@ -19,6 +25,10 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject IAppLogger _logger;
 @inject IDialogService _dialogService
+@inject IUserRepository _userRepository
+@inject IInvoiceService<Response<OneClickInvoice>, CopyTradingProject> _invoiceService
+@inject ISnackbar _snackbar
+
 
 <PageTitle>@_localize["Project"] | CopyTrader</PageTitle>
 
@@ -50,13 +60,13 @@
     }
     else
     {
-        @if (_project == null)
+        @if (_currentProject == null)
         {
             <h3>@_localize["ProjectNotFound"]</h3>
         }
         else
         {
-            <ProjectHead isAdmin=_isAdmin localize="_localize" project="_project" />
+            <ProjectHead isAdmin=_isAdmin localize="_localize" project="_currentProject" />
             <MudStack Row Justify="Justify.SpaceBetween" StretchItems="StretchItems.All" Wrap="Wrap.Wrap" Spacing="9" Class="my-7">
                 @* Users *@
                 <div>
@@ -64,11 +74,11 @@
                     <MudStack Row="false" Spacing="1">
                         <div class="mx-2">
                             <MudText Typo="Typo.h6" Inline Class="secondary-light">@_localize["TraderCount"]: </MudText>
-                            <MudText Typo="Typo.h6" Inline Style="font-weight: bold">@_project.TraderCount</MudText>
+                            <MudText Typo="Typo.h6" Inline Style="font-weight: bold">@_currentProject.TraderCount</MudText>
                         </div>
                         <div class="mx-2">
                             <MudText Typo="Typo.h6" Inline Class="secondary-light">@_localize["InvestorsCount"]: </MudText>
-                            <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_project.UserCount</MudText>
+                            <MudText Typo="Typo.h6" Inline Style=" font-weight: bold">@_currentProject.UserCount</MudText>
                         </div>
                     </MudStack>
 
@@ -92,7 +102,7 @@
                                 continue;
                             }
                             <MudItem xs="6" Class="pa-0">
-                                <MudCheckBox T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
+                                <MudCheckBox Disabled="_exchanges[exchange]" T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
                             </MudItem>
                         }
 
@@ -113,7 +123,7 @@
                     @foreach (OtherSettings setting in Enum.GetValues(typeof(OtherSettings)))
                     {                       
                         <MudItem xs="6" Class="pa-0">
-                            <MudCheckBox T="bool" @bind-Value="_otherSettings[setting]" Class="my-1" Dense Label="@setting.ToString()" Size="Size.Small"></MudCheckBox>
+                            <MudCheckBox Disabled="_otherSettings[setting]" T="bool" @bind-Value="_otherSettings[setting]" Class="my-1" Dense Label="@setting.ToString()" Size="Size.Small"></MudCheckBox>
                         </MudItem>
                     }
 
@@ -152,9 +162,9 @@
     }
 </MudPaper>
 
-@if (!_isLoading && _project != null)
+@if (!_isLoading && _currentProject != null)
 {
-    <ProjectServiceBlock IsAdmin="_isAdmin" project="_project"
+    <ProjectServiceBlock IsAdmin="_isAdmin" project="_currentProject"
                          freezeBlockVisibility="@freezeBlockVisibility" runBlockVisibility="@runBlockVisibility" />
 }
 
@@ -177,7 +187,7 @@
     private string freezeBlockVisibility = "invisible";
     private string runBlockVisibility = "invisible";
 
-    private CopyTradingProject? _project { get; set; }
+    private CopyTradingProject? _newProject { get; set; }
     private CopyTradingProject? _currentProject { get; set; }
     private Dictionary<OtherSettings, bool> _otherSettings { get; set; } = new Dictionary<OtherSettings, bool>
     {
@@ -207,23 +217,25 @@
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         _isAdmin = Helper.CheckIsAdmin(authState);
 
-        _project = await _projectRepository.GetById(id ?? 0, true, false);
+        _currentProject = await _projectRepository.GetById(id ?? 0, true, false);
 
-        foreach (var item in _project?.Exchanges)
-        {
-            _exchanges[item] = true;
-        }
+        _exchanges[ExchangeMarket.Binance] = _currentProject.Exchanges.BinanceEnabled;
+        _exchanges[ExchangeMarket.Bitget] = _currentProject.Exchanges.BitgetEnabled;
+        _exchanges[ExchangeMarket.BingX] = _currentProject.Exchanges.BingxEnabled;
+        _exchanges[ExchangeMarket.Bybit] = _currentProject.Exchanges.BybitEnabled;
+        _exchanges[ExchangeMarket.Kucoin] = _currentProject.Exchanges.KucoinEnabled;
+        _exchanges[ExchangeMarket.Okx] = _currentProject.Exchanges.OkxEnabled;
 
-        _otherSettings[OtherSettings.Billing] = _project.OtherSettings.BillingEnabled;
-        _otherSettings[OtherSettings.CrossTrading] = _project.OtherSettings.CrossTradingEnabled;
+        _otherSettings[OtherSettings.Billing] = _currentProject.OtherSettings.BillingEnabled;
+        _otherSettings[OtherSettings.CrossTrading] = _currentProject.OtherSettings.CrossTradingEnabled;
 
         //языки
-        SelectedDefaultLanguege = new LanguageModel { Code = _project.DefaultLanguage };
+        SelectedDefaultLanguege = new LanguageModel { Code = _currentProject.DefaultLanguage };
         SelectedLanguages = LanguageStaff.Languages.Select(s => new LanguageModel { Code = s.code, Name = s.name }).ToList();
         SelectedLanguages[0].Selected = true;
         SelectedLanguages[1].Selected = true;
 
-        _project.Languages?.ForEach(x =>
+        _currentProject.Languages?.ForEach(x =>
         {
             SelectedLanguages.ForEach(s =>
             {
@@ -248,10 +260,12 @@
             SelectedLanguages[0].DefaultLang = true;
         }
 
-        _currentProject = Helper.GetDeepClone(_project);
+        _newProject = Helper.GetDeepClone(_currentProject);
         _isLoading = false;
         StateHasChanged();
     }
+
+
 
 
     async void AddLanduageDialog()
@@ -298,9 +312,41 @@
 
     }
 
-    private void SaveChanges()
+    private async void SaveChanges()
     {
+        var servicesPrice = await _settingsRepository.GetServicesPrices();
+        var tariffPrice = SettingsHelper.GetTariffPrices(_currentProject.Tariff, servicesPrice);
 
+        _newProject.SetExchangeValues(_exchanges.Where(x => x.Value).Select(s => s.Key).ToList());
+        _newProject.SetSettingsValues(_otherSettings.Where(x => x.Value).Select(s => s.Key).ToList());
+
+        var editInvoiceResult = await _invoiceService.EditProjectInvoice(_newProject, _currentProject, _currentProject.Tariff);
+
+        var walletBalance = await _userRepository.GetWalletBalanceAsync(_currentProject.Owner.Id.ToString());
+
+        if (!editInvoiceResult.Success)
+        {
+            _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            _snackbar.Add("Изменения сохранены", Severity.Error);
+            return;
+        }
+
+
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var parameters = new DialogParameters<EditProjectDialog>();
+        parameters.Add(x => x.ProjectInvoice, editInvoiceResult.Data);
+        parameters.Add(x => x.Balance, walletBalance);
+        parameters.Add(x => x.Project, _newProject);
+        parameters.Add(x => x.Prices, servicesPrice);
+
+        var dialog = await _dialogService.ShowAsync<EditProjectDialog>(_localize["ChangingProjectConfiguration"], parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            
+        }
     }
 
     private void ReloadingData(CancellationToken stoppingToken)

@@ -22,8 +22,8 @@ namespace OneClick.Domain.Domain.OneClickProjects
         public DateTime LastPing { get; set; }
         public ProjectState State { get; set; }
 
-        public List<ExchangeMarket> Exchanges { get; set; }
-        public OtherSettingsValues OtherSettings { get; }
+        public ExchangeValues Exchanges { get; private set; }
+        public OtherSettingsValues OtherSettings { get; private set; }
        
         public bool Synchronized { get; set; }
         public ProjectPayment? Payment { get; set; }
@@ -44,7 +44,7 @@ namespace OneClick.Domain.Domain.OneClickProjects
         }
         public CopyTradingProject(int id, string projectDomain, TelegramBot telegramBot, string projectName,
             string serverIP, string serverName, int serverId, int proxyCount, int traderMaxCount, int userMaxCount, int traderCount, int userCount,
-            DateTime createDate, DateTime lastPing, ProjectState state, List<ExchangeMarket> exchanges, ProjectPayment payment, string logo,
+            DateTime createDate, DateTime lastPing, ProjectState state, ExchangeValues exchanges, ProjectPayment payment, string logo,
             ProjectTariff tariff, string defaultLanguage, List<Language> languages, double dayFee, string adminTelegram, long adminTelegramId,
             OtherSettingsValues otherSettings, Owner owner, ServerInfo server)
         {
@@ -74,6 +74,24 @@ namespace OneClick.Domain.Domain.OneClickProjects
             AdminTelegram = adminTelegram;
             AdminTelegramId = adminTelegramId;
             OtherSettings = otherSettings;
+        }
+
+        public void SetExchangeValues(List<ExchangeMarket> exchanges)
+        {
+            var exchangesResult = ExchangeValues.Create(exchanges);
+            if (exchangesResult.Success)
+            {
+                Exchanges = exchangesResult.Data;
+            }
+        }
+        
+        public void SetSettingsValues(List<OtherSettings> settings)
+        {
+            var exchangesResult = OtherSettingsValues.Create(settings);
+            if (exchangesResult.Success)
+            {
+                OtherSettings = exchangesResult.Data;
+            }
         }
 
     }

@@ -1,7 +1,6 @@
 ﻿using OneClick.Domain.Domain.Customers;
 using OneClick.Domain.Enums.Customer;
 using OneClick.UseCases.Enums;
-using System.Linq.Expressions;
 
 namespace OneClick.UseCases.Intefaces.User
 {
@@ -15,5 +14,6 @@ namespace OneClick.UseCases.Intefaces.User
 
         Task<bool> UpdateThemeAsync(string userId, UserTheme theme);
         Task<bool> UpdateBalanceAsync(Customer user);
+        Task<double> GetWalletBalanceAsync(string userId);
     }
 }

@@ -5,14 +5,14 @@ namespace OneClick.Domain.Domain.OneClickProjects.ValueObjects
 {
     public class Owner : ValueObject
     {
-        public Guid OwnerId { get;  }
-        public string? OwnerName { get;  }
+        public Guid Id { get;  }
+        public string? Name { get;  }
 
 
         private Owner(Guid OwnerId, string OwnerName)
         {
-            this.OwnerId = OwnerId;
-            this.OwnerName = OwnerName;
+            this.Id = OwnerId;
+            this.Name = OwnerName;
         }
         private Owner() { }
 

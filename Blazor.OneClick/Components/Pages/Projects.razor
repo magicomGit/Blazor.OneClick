@@ -5,8 +5,10 @@
 @using Microsoft.Extensions.Localization
 @using MudBlazor
 
+
 @using global::OneClick.Data.Helpers
 @using global::OneClick.Data.Repositoties
+@using global::OneClick.Domain.Domain.DomainModels
 @using global::OneClick.Domain.Domain.OneClickProjects
 @using global::OneClick.Domain.Domain.OneClickProjects.ValueObjects
 @using global::OneClick.Domain.Enums.Project
@@ -19,6 +21,7 @@
 @inject IOneClickProjectRepositoty projectRepository
 @inject IAppSettingsRepository settingsRepository
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IOneClickApi<Response<object>> _oneClickApi
 
 <PageTitle>@localize["Projects"] | CopyTrader</PageTitle>
 
@@ -95,11 +98,11 @@
                 <MudTd DataLabel="@localize["Owner"]">
                     @if (IsAdmin)
                     {
-                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.Owner.OwnerId)">@context.Owner.OwnerName</MudLink>
+                        <MudLink Class="text-decoration-none fw-bold" Color="Color.Primary" Href="@("users/"+context.Owner.Id)">@context.Owner.Name</MudLink>
                     }
                     else
                     {
-                        @context.Owner.OwnerName
+                        @context.Owner.Name
                     }
                 </MudTd>
 
@@ -128,6 +131,8 @@
             return;
         }
 
+        //var res = await _oneClickApi.GetProjectAsync("147.45.109.164", "BinTradeGroup");
+
         // var ex = new List<ExchangeMarket>();
         // var lg = new List<Language>();
         // var pay = new ProjectPayment();
@@ -153,7 +158,7 @@
 
         foreach (var project in CopyTradeProjects)
         {
-            var projectDayFee = ProjectHelper.GetProjectPaymentAmount(project, servicesPrice);
+            var projectDayFee = DataProjectHelper.GetProjectPaymentAmount(project, servicesPrice);
             project.DayFee = Math.Round(projectDayFee, 2);
 
             var logo = await projectRepository.GetProjectLogoMini(project.Id);

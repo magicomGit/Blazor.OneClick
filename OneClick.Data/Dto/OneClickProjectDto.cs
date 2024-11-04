@@ -84,21 +84,31 @@ namespace OneClick.Data.Dto
         public static CopyTradingProject? ProjectDto(Project p, ApplicationDbContext _context)
         {
             var serverId = _context.Servers.Where(x => x.Name == p.ServerName).Select(x => x.Id).FirstOrDefault();
-
             var config = GetProjectConfig(p.ProjectConfig);
+
+            var settings = new List<Domain.Enums.Project.OtherSettings> { };
+            if (config.EnableBilling)
+            {
+                settings.Add(Domain.Enums.Project.OtherSettings.Billing);
+            }
+            if (config.IsCrossTrading)
+            {
+                settings.Add(Domain.Enums.Project.OtherSettings.CrossTrading);
+            }
+
             var telegramBotResult = TelegramBot.Create(config.TelegramName, config.TelegramKey);
-            var otherSettingsResult = OtherSettingsValues.Create(config.EnableBilling, config.IsCrossTrading);
+            var otherSettingsResult = OtherSettingsValues.Create(settings);
             var ownerResult = Owner.Create(p.OwnerId, p.OwnerName);
             var serverResult = ServerInfo.Create(p.ServerIP, p.ServerName, serverId);
-
+            var exchangesResult = ExchangeValues.Create(config.Exchanges);
             
-            if (!telegramBotResult.IsSuccess || !ownerResult.Success || !serverResult.Success)
+            if (!telegramBotResult.IsSuccess || !ownerResult.Success || !serverResult.Success || !exchangesResult.Success)
             {
                 return null;
             }
 
             var project = new CopyTradingProject(p.Id, p.ProjectDomain, telegramBotResult.Value, p.ProjectName, p.ServerIP, p.ServerName,
-                0, p.ProxyCount, p.TraderMaxCount, p.UserMaxCount, p.TraderCount, p.UserCount, p.CreateDate, p.LastPing, p.State, config.Exchanges,
+                0, p.ProxyCount, p.TraderMaxCount, p.UserMaxCount, p.TraderCount, p.UserCount, p.CreateDate, p.LastPing, p.State, exchangesResult.Data,
                 PaymentDto(p.Payment), string.Empty, config.Tariff, config.DefaultLanguage, config.Languages, 0, config.AdminTelegram, config.AdminTelegramId,
                 otherSettingsResult.Data, ownerResult.Data, serverResult.Data);
 

@@ -1,0 +1,137 @@
+﻿@using Blazor.OneClick.Helpers
+@using Microsoft.Extensions.Localization
+@using global::OneClick.Domain.Domain.Balances
+@using global::OneClick.Domain.Domain.DomainModels
+@using global::OneClick.Domain.Domain.OneClickProjects
+@using global::OneClick.Domain.Enums.Project
+@using global::OneClick.UseCases.Intefaces.OneClickProjects
+
+
+@inject IStringLocalizer<Projects> _localize
+@inject IOneClickApi<Response<object>> _oneClickApi
+
+<MudDialog>
+    <DialogContent>
+        <div class="my-2">@_localize["NewSetProject"] <span class="fw-bold">@Project?.ProjectName</span></div>
+
+        <MudTable Items="@ProjectInvoice?.Items" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+            <HeaderContent>
+                <MudTh>@_localize["Name"]</MudTh>
+                <MudTh>@_localize["Price"]</MudTh>
+                <MudTh>@_localize["Description"]</MudTh>
+                <MudTh>@_localize["Amount"]</MudTh>
+
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="@_localize["Name"]">@context.Name</MudTd>
+                <MudTd DataLabel="@_localize["Price"]">@context.Price $</MudTd>
+                <MudTd DataLabel="@_localize["Description"]">@context.Description</MudTd>
+                <MudTd DataLabel="@_localize["Amount"]">@context.Sum.ToString("N2") $</MudTd>
+
+            </RowTemplate>
+        </MudTable>
+        <div class="d-flex justify-content-end  my-3">
+            <div>@_localize["Balance"]: <span class="fw-bold" style="color: @balanceColor; ">@Balance.ToString("N2")</span>  $</div>
+        </div>
+        <div class="d-flex justify-content-end my-3">
+            <div>@_localize["PayForNewSet"]:  <span class="fw-bold">@ProjectInvoice.Price.ToString("N2")</span>  $</div>
+        </div>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@_localize["Cancel"]</MudButton>
+        @if (Balance < ProjectInvoice.Price)
+        {
+            <MudLink Href="appuser?i=1" Color=Color.Surface Class="btn btn-danger text-decoration-none ">Пополнить баланс</MudLink>
+        }
+        else
+        {
+            <MudButton Disabled="_processing" Class="btn-cust" Variant="Variant.Filled" OnClick="Submit" Color="color">
+                @if (_processing)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">@_localize["ApplyProjectConfiguration"]</MudText>
+                }
+                else
+                {
+                    <MudText>@_localize["ApplyProjectConfiguration"]</MudText>
+                }
+
+            </MudButton>
+        }
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public OneClickInvoice? ProjectInvoice { get; set; }
+    [Parameter] public double Balance { get; set; }
+    [Parameter] public CopyTradingProject? Project { get; set; }
+    [Parameter] public ServicesPrice? Prices { get; set; }
+    Color color { get; set; } = Color.Info;
+    string balanceColor { get; set; } = "";
+    bool _processing { get; set; }
+    int maxRequestInOneMinute = 0;
+    int maxRequestInFiveMinute = 0;
+
+    protected override void OnParametersSet()
+    {
+        if (Balance < ProjectInvoice.Price)
+        {
+            balanceColor = "Red";
+        }
+        else
+        {
+            balanceColor = "Green";
+        }
+    }
+
+    void FillTariffSettings()
+    {
+        switch (Project.Tariff)
+        {
+            case ProjectTariff.Start:
+                maxRequestInOneMinute = Prices.MaxExchangeRequestInOneMinute;
+                maxRequestInFiveMinute = Prices.MaxExchangeRequestInFiveMinutes;
+                break;
+            case ProjectTariff.Company:
+                maxRequestInOneMinute = Prices.MaxExchangeRequestInOneMinute2;
+                maxRequestInFiveMinute = Prices.MaxExchangeRequestInFiveMinutes2;
+                break;
+            default:
+                break;
+        }
+    }
+
+    async Task Submit()
+    {
+
+        await Task.Run(() => { _processing = true; });
+
+
+        var settings = ProjectHelper.FillEditProjectSettings(Project);
+        FillTariffSettings();
+        var editResponse = new Response<bool>();
+
+        // editResponse = _oneClickApi.EditProjectConfig(settings);
+        // if (editResponse.Success)
+        // {
+        //     var setTariffResponse = await _oneClickApi.SetProjectTariffAsync(Project.Server.ServerIP, Project.ProjectName, Project.Tariff, maxRequestInOneMinute, maxRequestInFiveMinute);
+        //     if (!setTariffResponse.Success)
+        //     {
+        //         editResponse.Success = false;
+        //         editResponse.Message = setTariffResponse.Message;
+        //     }
+        // }
+        // else
+        // {
+        //     MudDialog.Close(DialogResult.Ok(editResponse));
+        //     return;
+        // }
+
+
+       MudDialog.Close(DialogResult.Ok(editResponse));
+    }
+    void Cancel() => MudDialog.Cancel();
+}

@@ -11,6 +11,7 @@ using OneClick.Data.Helpers;
 using OneClick.Data.Repositoties;
 using OneClick.Domain.Domain.Balances;
 using OneClick.Domain.Domain.DomainModels;
+using OneClick.Domain.Domain.OneClickProjects;
 using OneClick.Services.Balances;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
@@ -84,6 +85,8 @@ builder.Services.AddScoped<ITransactions<Response<OneClickTransaction>, OneClick
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAppLogger, AppLogger>();
 builder.Services.AddScoped<IPayments, Payments>();
+builder.Services.AddScoped<IOneClickApi<Response<object>>, OneClickApi>();
+builder.Services.AddScoped<IInvoiceService<Response<OneClickInvoice>, CopyTradingProject>, InvoiceService>();
 
 var app = builder.Build();
 

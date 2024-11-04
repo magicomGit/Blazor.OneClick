@@ -13,5 +13,6 @@ namespace OneClick.Data.Data
         public DbSet<TelegramUser>? TelegramUsers { get; set; }
         public DbSet<ProjectDomain>? ProjectDomains { get; set; }
         public DbSet<OneClickServer>? Servers { get; set; }
+        public DbSet<Invoice>? Invoices { get; set; }
     }
 }

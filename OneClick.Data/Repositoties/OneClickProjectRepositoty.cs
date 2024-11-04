@@ -23,7 +23,7 @@ namespace OneClick.Data.Repositoties
                 AdminTelegram = project.AdminTelegram,
                 AdminTelegramId = project.AdminTelegramId,
                 DefaultLanguage = project.DefaultLanguage,
-                Exchanges = project.Exchanges,
+                //Exchanges = project.Exchanges,
 
             };
 
@@ -37,8 +37,8 @@ namespace OneClick.Data.Repositoties
                 Description = string.Empty,
                 EngineVersion = string.Empty,
                 LastPing = project.LastPing,
-                OwnerId = project.Owner.OwnerId,
-                OwnerName = project.Owner.OwnerName,
+                OwnerId = project.Owner.Id,
+                OwnerName = project.Owner.Name,
                 Payment = OneClickProjectDto.PaymentDto(project.Payment),
                 ProjectConfig = OneClickProjectDto.GetProjectConfigJson(config),
                 IsRun = 0,

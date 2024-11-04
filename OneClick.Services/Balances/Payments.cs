@@ -1,6 +1,7 @@
 ﻿using OneClick.Domain.Domain.DomainModels;
 using OneClick.Domain.Domain.OneClickProjects;
 using OneClick.Domain.Enums.Project;
+using OneClick.Services.Helpers;
 using OneClick.UseCases.Intefaces.App;
 using OneClick.UseCases.Intefaces.Balances;
 
@@ -61,7 +62,7 @@ namespace OneClick.Services.Balances
 
             double amount = 0;
             
-            var tariffprices = GetTariffPrices(project.Tariff, servicesPrice);
+            var tariffprices = SettingsHelper.GetTariffPrices(project.Tariff, servicesPrice);
 
             amount += tariffprices.TraderRateDaily * traderCount;
             amount += tariffprices.UserRateDaily * investorCount;
@@ -72,43 +73,6 @@ namespace OneClick.Services.Balances
             return amount;
         }
 
-        private  TariffPrices GetTariffPrices(ProjectTariff tariff, ServicesPrice servicesPrice)
-        {
-            var prices = new TariffPrices();
-
-            switch (tariff)
-            {
-                case ProjectTariff.Start:
-                    prices.CreateProjectRate = servicesPrice.CreateProjectRate;
-                    prices.TraderRate = servicesPrice.TraderRate;
-                    prices.TraderRateDaily = Math.Round(servicesPrice.TraderRate / 30, 2);
-                    prices.UserRate = servicesPrice.UserRate;
-                    prices.UserRateDaily = Math.Round(servicesPrice.UserRate / 30, 2);
-                    prices.ExchangeRate = servicesPrice.ExchangeRate;
-                    prices.CrossTradingRate = servicesPrice.CrossTradingRate;
-                    prices.BillingRate = servicesPrice.BillingRate;
-                    prices.AddDomainRate = servicesPrice.AddDomainRate;
-                    prices.MaxExchangeRequestInOneMinute = servicesPrice.MaxExchangeRequestInOneMinute;
-                    prices.MaxExchangeRequestInFiveMinutes = servicesPrice.MaxExchangeRequestInFiveMinutes;
-                    break;
-                case ProjectTariff.Company:
-                    prices.CreateProjectRate = servicesPrice.CreateProjectRate2;
-                    prices.TraderRate = servicesPrice.TraderRate2;
-                    prices.TraderRateDaily = Math.Round(servicesPrice.TraderRate2 / 30, 2);
-                    prices.UserRate = servicesPrice.UserRate2;
-                    prices.UserRateDaily = Math.Round(servicesPrice.UserRate2 / 30, 2);
-                    prices.ExchangeRate = servicesPrice.ExchangeRate2;
-                    prices.CrossTradingRate = servicesPrice.CrossTradingRate2;
-                    prices.BillingRate = servicesPrice.BillingRate2;
-                    prices.AddDomainRate = servicesPrice.AddDomainRate2;
-                    prices.MaxExchangeRequestInOneMinute = servicesPrice.MaxExchangeRequestInOneMinute2;
-                    prices.MaxExchangeRequestInFiveMinutes = servicesPrice.MaxExchangeRequestInFiveMinutes2;
-                    break;
-                default:
-                    break;
-            }
-
-            return prices;
-        }
+       
     }
 }

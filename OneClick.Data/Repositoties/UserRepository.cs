@@ -291,6 +291,13 @@ namespace OneClick.Data.Repositoties
             }
         }
 
+        public async Task<double> GetWalletBalanceAsync(string userId)
+        {
+            var userBalance = await _context.Users.Where(x => x.Id == userId).Select(s => s.Balance.WalletBalance).FirstOrDefaultAsync();   
+
+            return userBalance;
+        }
+
         //=================== private methods ================
         private List<Customer> DTO(List<ApplicationUser> users, bool requireBalnce, bool requirePayment, bool requireAlerts)
         {
@@ -363,5 +370,7 @@ namespace OneClick.Data.Repositoties
 
             return customers;
         }
+
+       
     }
 }

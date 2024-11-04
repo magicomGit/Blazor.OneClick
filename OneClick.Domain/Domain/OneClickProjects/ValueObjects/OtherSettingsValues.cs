@@ -2,6 +2,7 @@
 
 using CSharpFunctionalExtensions;
 using OneClick.Domain.Domain.DomainModels;
+using OneClick.Domain.Enums.Project;
 
 namespace OneClick.Domain.Domain.OneClickProjects.ValueObjects
 {
@@ -25,10 +26,28 @@ namespace OneClick.Domain.Domain.OneClickProjects.ValueObjects
 
 
 
-        public static Response<OtherSettingsValues> Create(bool billingEnabled, bool crossTradingEnabled)
+        public static Response<OtherSettingsValues> Create(List<OtherSettings> settings)
         {
             var response = new Response<OtherSettingsValues> { Success = true };
-            response.Data = new OtherSettingsValues(billingEnabled, crossTradingEnabled);
+
+            bool BillingEnabled = false;
+            bool CrossTradingEnabled = false;
+
+            foreach (var item in settings)
+            {
+
+                switch (item)
+                {
+                    case OtherSettings.Billing:
+                        BillingEnabled = true; break;
+                    case OtherSettings.CrossTrading:
+                        CrossTradingEnabled = true; break;
+                    default:
+                        break;
+                }
+            }
+
+            response.Data = new OtherSettingsValues(BillingEnabled, CrossTradingEnabled);
             return response;
         }
 

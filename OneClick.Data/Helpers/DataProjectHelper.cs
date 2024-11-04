@@ -4,7 +4,7 @@ using OneClick.Domain.Enums.Project;
 
 namespace OneClick.Data.Helpers
 {
-    public static class ProjectHelper
+    public static class DataProjectHelper
     {
         public static double GetProjectPaymentAmount(CopyTradingProject project, ServicesPrice servicesPrice)
         {

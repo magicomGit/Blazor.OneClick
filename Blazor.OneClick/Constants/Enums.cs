@@ -70,8 +70,9 @@
             Huobi = 40,
             Kraken = 50,
             Kucoin = 60,
-            Okex = 70,
-            Bitget = 80
+            OKX = 70,
+            Bitget = 80,
+            Bingx = 90
         }
 
         //public enum  UserRoles
