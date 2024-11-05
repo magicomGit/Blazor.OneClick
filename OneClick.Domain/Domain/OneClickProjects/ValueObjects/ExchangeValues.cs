@@ -57,7 +57,7 @@ namespace OneClick.Domain.Domain.OneClickProjects.ValueObjects
                         BybitEnabled = true; break;
                     case ExchangeMarket.Kucoin:
                         KucoinEnabled = true; break;
-                    case ExchangeMarket.Okx:
+                    case ExchangeMarket.OKX:
                         OkxEnabled = true; break;
                     default:
                         break;

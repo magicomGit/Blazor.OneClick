@@ -18,7 +18,7 @@
 @attribute [Authorize]
 
 @inject IStringLocalizer<Projects> localize
-@inject IOneClickProjectRepositoty projectRepository
+@inject IOneClickProjectRepositoty _projectRepository
 @inject IAppSettingsRepository settingsRepository
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IOneClickApi<Response<object>> _oneClickApi
@@ -146,12 +146,12 @@
         AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         IsAdmin = UserHelper.CheckIsAdmin(AuthState);
 
-        CopyTradeProjects = await projectRepository.Get();
+        CopyTradeProjects = await _projectRepository.Get();
         if (CopyTradeProjects == null)
         {
             return;
         }
-        StateHasChanged();
+        //StateHasChanged();
 
         var servicesPrice = await settingsRepository.GetServicesPrices();
 
@@ -161,7 +161,7 @@
             var projectDayFee = DataProjectHelper.GetProjectPaymentAmount(project, servicesPrice);
             project.DayFee = Math.Round(projectDayFee, 2);
 
-            var logo = await projectRepository.GetProjectLogoMini(project.Id);
+            var logo = await _projectRepository.GetProjectLogoMini(project.Id);
             if (logo != string.Empty)
             {
                 project.Logo = logo;

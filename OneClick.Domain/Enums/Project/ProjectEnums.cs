@@ -34,7 +34,7 @@
         Bitget = 80,
         Bybit = 20,
         Kucoin = 60,
-        Okx = 70,
+        OKX = 70,
     }
     public enum OtherSettings
     {

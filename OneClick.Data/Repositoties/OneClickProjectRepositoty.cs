@@ -82,7 +82,18 @@ namespace OneClick.Data.Repositoties
                 return projects;
             }
 
-            projectEntities.ForEach(project => projects.Add(OneClickProjectDto.ProjectDto(project, _context)));
+            projectEntities.ForEach(project => {
+
+                var copyTradingProject = OneClickProjectDto.ProjectDto(project, _context);
+                if (copyTradingProject != null) {
+                    projects.Add(copyTradingProject); 
+                }
+                else
+                {
+
+                }
+               
+            } );
 
             return projects;
         }

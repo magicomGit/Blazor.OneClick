@@ -102,7 +102,7 @@
                                 continue;
                             }
                             <MudItem xs="6" Class="pa-0">
-                                <MudCheckBox Disabled="_exchanges[exchange]" T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
+                                <MudCheckBox Disabled="@GetExchangeCheckBoxState(exchange)" T="bool" @bind-Value="_exchanges[exchange]" Class="my-1" Dense Label="@exchange.ToString()" Size="Size.Small"></MudCheckBox>
                             </MudItem>
                         }
 
@@ -121,7 +121,7 @@
                         </div>
                     </MudStack>
                     @foreach (OtherSettings setting in Enum.GetValues(typeof(OtherSettings)))
-                    {                       
+                    {
                         <MudItem xs="6" Class="pa-0">
                             <MudCheckBox Disabled="_otherSettings[setting]" T="bool" @bind-Value="_otherSettings[setting]" Class="my-1" Dense Label="@setting.ToString()" Size="Size.Small"></MudCheckBox>
                         </MudItem>
@@ -201,7 +201,7 @@
         {ExchangeMarket.BingX, false},
         {ExchangeMarket.Bybit, false},
         {ExchangeMarket.Kucoin, false},
-        {ExchangeMarket.Okx, false},
+        {ExchangeMarket.OKX, false},
     };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -224,7 +224,7 @@
         _exchanges[ExchangeMarket.BingX] = _currentProject.Exchanges.BingxEnabled;
         _exchanges[ExchangeMarket.Bybit] = _currentProject.Exchanges.BybitEnabled;
         _exchanges[ExchangeMarket.Kucoin] = _currentProject.Exchanges.KucoinEnabled;
-        _exchanges[ExchangeMarket.Okx] = _currentProject.Exchanges.OkxEnabled;
+        _exchanges[ExchangeMarket.OKX] = _currentProject.Exchanges.OkxEnabled;
 
         _otherSettings[OtherSettings.Billing] = _currentProject.OtherSettings.BillingEnabled;
         _otherSettings[OtherSettings.CrossTrading] = _currentProject.OtherSettings.CrossTradingEnabled;
@@ -265,12 +265,31 @@
         StateHasChanged();
     }
 
-
+    bool GetExchangeCheckBoxState(ExchangeMarket exchane)//выключаем чекбокс только для сохраненной биржи
+    {
+        switch (exchane)
+        {
+            case ExchangeMarket.Binance:
+                if (_currentProject.Exchanges.BinanceEnabled) { return true; } else { return false; }
+            case ExchangeMarket.Bitget:
+                if (_currentProject.Exchanges.BitgetEnabled) { return true; } else { return false; }
+            case ExchangeMarket.BingX:
+                if (_currentProject.Exchanges.BingxEnabled) { return true; } else { return false; }
+            case ExchangeMarket.Bybit:
+                if (_currentProject.Exchanges.BybitEnabled) { return true; } else { return false; }
+            case ExchangeMarket.Kucoin:
+                if (_currentProject.Exchanges.KucoinEnabled) { return true; } else { return false; }
+            case ExchangeMarket.OKX:
+                if (_currentProject.Exchanges.OkxEnabled) { return true; } else { return false; }
+            default:
+                return false;
+        }
+    }
 
 
     async void AddLanduageDialog()
     {
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
 
         var parameters = new DialogParameters<LenguageSelectModal>();
         parameters.Add(x => x.SelectedLanguages, SelectedLanguages);
@@ -333,7 +352,7 @@
 
 
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions() { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
 
         var parameters = new DialogParameters<EditProjectDialog>();
         parameters.Add(x => x.ProjectInvoice, editInvoiceResult.Data);
@@ -345,7 +364,7 @@
         var result = await dialog.Result;
         if (!result.Canceled)
         {
-            
+
         }
     }
 
