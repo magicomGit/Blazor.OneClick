@@ -29,9 +29,9 @@
 
 
 
-        <StatusMessage  Message="@errorMessage" />
+        <StatusMessage Message="@errorMessage" />
         <div class="d-flex flex-wrap justify-content-center my-4">
-        <MudImage Style="margin-left:auto; margin-right:auto" Width="90" Src="@SystemLogo.Content" />
+            <MudImage Style="margin-left:auto; margin-right:auto" Width="90" Src="@SystemLogo.Content" />
 
         </div>
 
@@ -40,7 +40,7 @@
 
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
-            
+
 
 
 
@@ -50,11 +50,11 @@
                           Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" @bind-Value="Input.Password" For="@(() => Input.Password)" />
 
 
-           
-            
-                <MudButton FullWidth Class="btn-cust w-100" Size="Size.Large" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@localize["LoginButton"]</MudButton>
 
-            
+
+            <MudButton FullWidth Class="btn-cust w-100" Size="Size.Large" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@localize["LoginButton"]</MudButton>
+
+
             <div style="text-align:center" class=" my-3">
                 <p>
                     <div>
@@ -68,10 +68,10 @@
                 </p>
 
             </div>
-        </EditForm> 
+        </EditForm>
     </MudPaper>
-    
-        </MudPaper>
+
+</MudPaper>
 
 
 
