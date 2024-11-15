@@ -18,6 +18,9 @@ namespace OneClick.Data.Data
         public virtual AccountPayment? PaymentInfo { get; set; }
         public string? Language { get; set; }
         public UserTheme Theme { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime TokenCreated { get; set; }
+        public DateTime TokenExpires { get; set; }
     }
 
     public class Balance

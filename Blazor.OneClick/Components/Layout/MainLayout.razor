@@ -43,7 +43,7 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Fixed="false" Elevation="0" >
+            <MudAppBar Fixed="true" Elevation="0" >
 
                 <div class="">
                     <MudStack Row>
@@ -90,7 +90,7 @@
             </MudAppBar>
 
 
-            <MudPaper Elevation="1" Class="d-none d-md-block px-4 py-2" Style="@(_dark ? "background:1a1c2d": "background:#fff")">
+            <MudPaper Square Elevation="1" Class="d-none d-md-block px-4 py-2" Style="@(_dark ? "background:#1a1c2d; margin-top:64px": "background:#fff;  margin-top:64px")">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="pa-1" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
             </MudPaper>
 
